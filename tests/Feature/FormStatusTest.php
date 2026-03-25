@@ -1,0 +1,281 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Form;
+use App\Models\FormField;
+use App\Models\FormTemplate;
+use App\Models\InputFieldTemplate;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class FormStatusTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private function createSetup(): array
+    {
+        $manager = User::factory()->create(['role' => 'employee_manager']);
+        $employee = User::factory()->create(['role' => 'employee_base']);
+        $requester = User::factory()->create(['role' => 'requester']);
+
+        $template = FormTemplate::create([
+            'name' => 'Test Template',
+            'created_by' => $manager->id,
+            'is_active' => true,
+        ]);
+
+        $fieldTemplate = InputFieldTemplate::create([
+            'form_template_id' => $template->id,
+            'label' => 'Test Field',
+            'type' => 'text',
+            'required' => false,
+            'order' => 0,
+        ]);
+
+        $form = Form::create([
+            'form_template_id' => $template->id,
+            'user_id' => $requester->id,
+            'title' => 'Test Form',
+            'status' => 'draft',
+        ]);
+
+        FormField::create([
+            'form_id' => $form->id,
+            'input_field_template_id' => $fieldTemplate->id,
+            'value' => null,
+        ]);
+
+        $form->assignedEmployees()->attach($employee->id);
+
+        return compact('manager', 'employee', 'requester', 'template', 'form', 'fieldTemplate');
+    }
+
+    public function test_requester_can_view_dashboard(): void
+    {
+        $setup = $this->createSetup();
+        $this->actingAs($setup['requester'])->get('/dashboard')->assertOk();
+    }
+
+    public function test_employee_can_view_dashboard(): void
+    {
+        $setup = $this->createSetup();
+        $this->actingAs($setup['employee'])->get('/dashboard')->assertOk();
+    }
+
+    public function test_requester_can_view_available_forms(): void
+    {
+        $setup = $this->createSetup();
+        $this->actingAs($setup['requester'])->get('/requester/available-forms')->assertOk();
+    }
+
+    public function test_requester_can_create_form(): void
+    {
+        $setup = $this->createSetup();
+        $response = $this->actingAs($setup['requester'])
+            ->post('/requester/forms/create/' . $setup['template']->id, [
+                'title' => 'New Form',
+            ]);
+        $response->assertRedirect();
+        $this->assertDatabaseHas('forms', ['title' => 'New Form', 'status' => 'draft']);
+    }
+
+    public function test_requester_can_edit_draft_form(): void
+    {
+        $setup = $this->createSetup();
+        $this->actingAs($setup['requester'])
+            ->get('/forms/' . $setup['form']->id . '/edit')
+            ->assertOk();
+    }
+
+    public function test_requester_can_submit_draft_form(): void
+    {
+        $setup = $this->createSetup();
+        $this->actingAs($setup['requester'])
+            ->post('/forms/' . $setup['form']->id . '/submit')
+            ->assertRedirect();
+
+        $setup['form']->refresh();
+        $this->assertEquals('submitted', $setup['form']->status);
+    }
+
+    public function test_requester_cannot_edit_submitted_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+
+        $this->actingAs($setup['requester'])
+            ->get('/forms/' . $setup['form']->id . '/edit')
+            ->assertForbidden();
+    }
+
+    public function test_employee_can_accept_submitted_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+
+        $this->actingAs($setup['employee'])
+            ->post('/employee/forms/' . $setup['form']->id . '/accept')
+            ->assertRedirect();
+
+        $setup['form']->refresh();
+        $this->assertEquals('accepted', $setup['form']->status);
+    }
+
+    public function test_employee_can_decline_submitted_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+
+        $this->actingAs($setup['employee'])
+            ->post('/employee/forms/' . $setup['form']->id . '/decline')
+            ->assertRedirect();
+
+        $setup['form']->refresh();
+        $this->assertEquals('declined', $setup['form']->status);
+    }
+
+    public function test_employee_can_request_corrections(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+
+        $this->actingAs($setup['employee'])
+            ->post('/employee/forms/' . $setup['form']->id . '/request-corrections', [
+                'comment' => 'Please fix your name field.',
+            ])
+            ->assertRedirect();
+
+        $setup['form']->refresh();
+        $this->assertEquals('corrections', $setup['form']->status);
+        $this->assertDatabaseHas('comments', ['body' => 'Please fix your name field.']);
+    }
+
+    public function test_requester_can_edit_corrections_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'corrections']);
+
+        $this->actingAs($setup['requester'])
+            ->get('/forms/' . $setup['form']->id . '/edit')
+            ->assertOk();
+    }
+
+    public function test_requester_can_resubmit_corrections_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'corrections']);
+
+        $this->actingAs($setup['requester'])
+            ->post('/forms/' . $setup['form']->id . '/submit')
+            ->assertRedirect();
+
+        $setup['form']->refresh();
+        $this->assertEquals('submitted', $setup['form']->status);
+    }
+
+    public function test_requester_cannot_accept_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+
+        $this->actingAs($setup['requester'])
+            ->post('/employee/forms/' . $setup['form']->id . '/accept')
+            ->assertForbidden();
+    }
+
+    public function test_nobody_can_edit_accepted_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'accepted']);
+
+        $this->actingAs($setup['requester'])
+            ->get('/forms/' . $setup['form']->id . '/edit')
+            ->assertForbidden();
+
+        $this->actingAs($setup['employee'])
+            ->get('/forms/' . $setup['form']->id . '/edit')
+            ->assertForbidden();
+    }
+
+    public function test_manager_can_create_template(): void
+    {
+        $setup = $this->createSetup();
+        $this->actingAs($setup['manager'])
+            ->get('/form-templates/create')
+            ->assertOk();
+    }
+
+    public function test_requester_cannot_access_templates(): void
+    {
+        $setup = $this->createSetup();
+        $this->actingAs($setup['requester'])
+            ->get('/form-templates')
+            ->assertForbidden();
+    }
+
+    public function test_manager_can_assign_employee_to_form(): void
+    {
+        $setup = $this->createSetup();
+        $newEmployee = User::factory()->create(['role' => 'employee_base']);
+
+        $this->actingAs($setup['manager'])
+            ->post('/forms/' . $setup['form']->id . '/assign-employee', [
+                'employee_id' => $newEmployee->id,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('form_employees', [
+            'form_id' => $setup['form']->id,
+            'employee_id' => $newEmployee->id,
+        ]);
+    }
+
+    public function test_revision_is_created_on_update(): void
+    {
+        $setup = $this->createSetup();
+        $this->actingAs($setup['requester'])
+            ->put('/forms/' . $setup['form']->id, [
+                'fields' => [$setup['fieldTemplate']->id => 'New Value'],
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('revisions', ['form_id' => $setup['form']->id]);
+        $this->assertDatabaseHas('form_fields', ['value' => 'New Value']);
+    }
+
+    public function test_employee_can_view_submitted_forms_list(): void
+    {
+        $setup = $this->createSetup();
+        $this->actingAs($setup['employee'])
+            ->get('/employee/submitted')
+            ->assertOk();
+    }
+
+    public function test_employee_can_view_corrections_list(): void
+    {
+        $setup = $this->createSetup();
+        $this->actingAs($setup['employee'])
+            ->get('/employee/corrections')
+            ->assertOk();
+    }
+
+    public function test_employee_can_view_completed_forms_list(): void
+    {
+        $setup = $this->createSetup();
+        $this->actingAs($setup['employee'])
+            ->get('/employee/completed')
+            ->assertOk();
+    }
+
+    public function test_unassigned_base_employee_cannot_view_form(): void
+    {
+        $setup = $this->createSetup();
+        $unassigned = User::factory()->create(['role' => 'employee_base']);
+
+        $this->actingAs($unassigned)
+            ->get('/forms/' . $setup['form']->id)
+            ->assertForbidden();
+    }
+}
