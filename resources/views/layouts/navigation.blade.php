@@ -39,6 +39,9 @@
                             <x-nav-link :href="route('form-templates.index')" :active="request()->routeIs('form-templates.*')">
                                 {{ __('Templates') }}
                             </x-nav-link>
+                            <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                                {{ __('Users') }}
+                            </x-nav-link>
                         @endif
                     @endif
                 </div>
@@ -99,6 +102,7 @@
                 <x-responsive-nav-link :href="route('employee.completed')" :active="request()->routeIs('employee.completed')">{{ __('Completed Forms') }}</x-responsive-nav-link>
                 @if(auth()->user()->isManagerOrAdmin())
                     <x-responsive-nav-link :href="route('form-templates.index')" :active="request()->routeIs('form-templates.*')">{{ __('Templates') }}</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">{{ __('Users') }}</x-responsive-nav-link>
                 @endif
             @endif
         </div>
