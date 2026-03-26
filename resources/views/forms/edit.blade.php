@@ -92,13 +92,26 @@
                                     <p x-show="error" x-text="error" class="mt-1 text-xs text-red-600 dark:text-red-400"></p>
                                     <button type="button" :disabled="submitting"
                                         @click="
-                                            if (!body.trim()) { error = 'Comment is required.'; return; }
-                                            submitting = true; error = '';
+                                            if (!body.trim()) { error = 'Please enter a comment.'; return; }
+                                            submitting = true;
+                                            error = '';
                                             fetch('{{ route('forms.comments.store', $form) }}', {
                                                 method: 'POST',
-                                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
-                                                body: JSON.stringify({ body: body, input_field_template_id: '{{ $template->id }}' })
-                                            }).then(r => { if (r.ok) { window.location.reload(); } else { error = 'Failed to add comment.'; submitting = false; } }).catch(() => { error = 'Failed to add comment.'; submitting = false; });
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                    'Accept': 'application/json'
+                                                },
+                                                body: JSON.stringify({
+                                                    body: body,
+                                                    input_field_template_id: '{{ $template->id }}'
+                                                })
+                                            })
+                                            .then(r => {
+                                                if (r.ok) { window.location.reload(); }
+                                                else { error = 'Failed to add comment.'; submitting = false; }
+                                            })
+                                            .catch(() => { error = 'Failed to add comment.'; submitting = false; });
                                         "
                                         class="mt-1 px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-xs disabled:opacity-50">
                                         <span x-show="!submitting">Add Comment</span>
