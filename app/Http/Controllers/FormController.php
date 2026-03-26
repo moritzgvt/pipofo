@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Form;
 use App\Models\FormTemplate;
 use App\Models\FormField;
+use App\Models\FormView;
 use App\Models\Revision;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -48,14 +49,20 @@ class FormController extends Controller
         $baseEmployees = Auth::user()->isManagerOrAdmin()
             ? User::where('role', 'employee_base')->get()
             : collect();
-        return view('forms.show', compact('form', 'baseEmployees'));
+
+        $lastViewedAt = $this->recordFormView($form);
+
+        return view('forms.show', compact('form', 'baseEmployees', 'lastViewedAt'));
     }
 
     public function edit(Form $form)
     {
         $this->authorizeEdit($form);
         $form->load('fields.inputFieldTemplate', 'formTemplate', 'comments.user', 'comments.inputFieldTemplate');
-        return view('forms.edit', compact('form'));
+
+        $lastViewedAt = $this->recordFormView($form);
+
+        return view('forms.edit', compact('form', 'lastViewedAt'));
     }
 
     public function update(Request $request, Form $form)
@@ -180,5 +187,21 @@ class FormController extends Controller
         if ($user->isEmployeeBase()) {
             abort_unless($form->assignedEmployees->contains('id', $user->id), 403);
         }
+    }
+
+    private function recordFormView(Form $form): ?\Carbon\Carbon
+    {
+        $view = FormView::where('form_id', $form->id)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        $lastViewedAt = $view?->last_viewed_at;
+
+        FormView::updateOrCreate(
+            ['form_id' => $form->id, 'user_id' => Auth::id()],
+            ['last_viewed_at' => now()]
+        );
+
+        return $lastViewedAt;
     }
 }

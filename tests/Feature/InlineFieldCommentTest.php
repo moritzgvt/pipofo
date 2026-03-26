@@ -6,6 +6,7 @@ use App\Models\Comment;
 use App\Models\Form;
 use App\Models\FormField;
 use App\Models\FormTemplate;
+use App\Models\FormView;
 use App\Models\InputFieldTemplate;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -223,5 +224,114 @@ class InlineFieldCommentTest extends TestCase
             ->assertOk()
             ->assertSee('Requester inline comment')
             ->assertSee('Employee inline comment');
+    }
+
+    public function test_new_comment_highlighted_on_show_page(): void
+    {
+        $setup = $this->createSetup();
+
+        // Simulate a previous visit
+        FormView::create([
+            'form_id' => $setup['form']->id,
+            'user_id' => $setup['requester']->id,
+            'last_viewed_at' => now()->subMinutes(10),
+        ]);
+
+        // Old comment (before last visit)
+        Comment::create([
+            'form_id' => $setup['form']->id,
+            'user_id' => $setup['employee']->id,
+            'input_field_template_id' => $setup['fieldTemplate']->id,
+            'body' => 'Old comment before visit',
+            'is_employee_comment' => true,
+            'created_at' => now()->subMinutes(20),
+        ]);
+
+        // New comment (after last visit)
+        Comment::create([
+            'form_id' => $setup['form']->id,
+            'user_id' => $setup['employee']->id,
+            'input_field_template_id' => $setup['fieldTemplate']->id,
+            'body' => 'New comment after visit',
+            'is_employee_comment' => true,
+            'created_at' => now()->subMinutes(5),
+        ]);
+
+        $response = $this->actingAs($setup['requester'])
+            ->get(route('forms.show', $setup['form']));
+
+        $response->assertOk()
+            ->assertSee('Old comment before visit')
+            ->assertSee('New comment after visit')
+            ->assertSee('ring-yellow-400'); // field highlight
+    }
+
+    public function test_new_comment_highlighted_on_edit_page(): void
+    {
+        $setup = $this->createSetup();
+
+        // Simulate a previous visit
+        FormView::create([
+            'form_id' => $setup['form']->id,
+            'user_id' => $setup['requester']->id,
+            'last_viewed_at' => now()->subMinutes(10),
+        ]);
+
+        // New comment (after last visit)
+        Comment::create([
+            'form_id' => $setup['form']->id,
+            'user_id' => $setup['employee']->id,
+            'input_field_template_id' => $setup['fieldTemplate']->id,
+            'body' => 'New edit page comment',
+            'is_employee_comment' => true,
+            'created_at' => now()->subMinutes(5),
+        ]);
+
+        $response = $this->actingAs($setup['requester'])
+            ->get(route('forms.edit', $setup['form']));
+
+        $response->assertOk()
+            ->assertSee('New edit page comment')
+            ->assertSee('ring-yellow-400'); // field highlight
+    }
+
+    public function test_no_highlight_on_first_visit(): void
+    {
+        $setup = $this->createSetup();
+
+        Comment::create([
+            'form_id' => $setup['form']->id,
+            'user_id' => $setup['employee']->id,
+            'input_field_template_id' => $setup['fieldTemplate']->id,
+            'body' => 'Comment on first visit',
+            'is_employee_comment' => true,
+        ]);
+
+        // First visit — no FormView record exists, so no highlights
+        $response = $this->actingAs($setup['requester'])
+            ->get(route('forms.show', $setup['form']));
+
+        $response->assertOk()
+            ->assertSee('Comment on first visit')
+            ->assertDontSee('ring-yellow-400');
+    }
+
+    public function test_form_view_timestamp_updated_on_visit(): void
+    {
+        $setup = $this->createSetup();
+
+        $this->actingAs($setup['requester'])
+            ->get(route('forms.show', $setup['form']));
+
+        $this->assertDatabaseHas('form_views', [
+            'form_id' => $setup['form']->id,
+            'user_id' => $setup['requester']->id,
+        ]);
+
+        $view = FormView::where('form_id', $setup['form']->id)
+            ->where('user_id', $setup['requester']->id)
+            ->first();
+
+        $this->assertNotNull($view->last_viewed_at);
     }
 }

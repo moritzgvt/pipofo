@@ -17,11 +17,13 @@
                     @php
                         $template = $field->inputFieldTemplate;
                         $fieldComments = $form->comments->where('input_field_template_id', $template->id);
+                        $hasNewComments = $lastViewedAt && $fieldComments->contains(fn($c) => $c->created_at->gt($lastViewedAt));
                     @endphp
-                    <div class="mb-6">
+                    <div class="mb-6 {{ $hasNewComments ? 'ring-2 ring-yellow-400 dark:ring-yellow-500 rounded-lg p-3 bg-yellow-50/30 dark:bg-yellow-900/10' : '' }}">
                         <label for="field_{{ $template->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             {{ $template->label }}
                             @if($template->required) <span class="text-red-500">*</span> @endif
+                            @if($hasNewComments) <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200">New</span> @endif
                         </label>
                         @if($template->help_text)
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $template->help_text }}</p>
@@ -73,13 +75,17 @@
                                     @if($fieldComments->isNotEmpty())
                                         <div class="space-y-2">
                                             @foreach($fieldComments as $comment)
-                                                <div class="p-2 rounded-md text-sm {{ $comment->is_employee_comment ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600' }}">
+                                                @php $isNew = $lastViewedAt && $comment->created_at->gt($lastViewedAt); @endphp
+                                                <div class="p-2 rounded-md text-sm {{ $isNew ? 'bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400 dark:border-yellow-600' : ($comment->is_employee_comment ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600') }}">
                                                     <div class="flex justify-between items-center mb-1">
                                                         <span class="text-xs font-medium {{ $comment->is_employee_comment ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200' }}">
                                                             {{ $comment->user->name }}
                                                             @if($comment->is_employee_comment) <span class="text-xs">(Employee)</span> @endif
                                                         </span>
-                                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
+                                                        <span class="flex items-center gap-1">
+                                                            @if($isNew) <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200">New</span> @endif
+                                                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
+                                                        </span>
                                                     </div>
                                                     <p class="text-sm text-gray-700 dark:text-gray-300">{{ $comment->body }}</p>
                                                 </div>
