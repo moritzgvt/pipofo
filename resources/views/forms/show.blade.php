@@ -120,8 +120,8 @@
 
                         {{-- Field-specific comments (collapsible, visually distinct) --}}
                         @if($fieldComments->isNotEmpty() || !$form->isCompleted())
-                            <div x-data="{ expanded: {{ $fieldComments->isNotEmpty() ? 'true' : 'false' }} }" class="mt-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
-                                <button @click="expanded = !expanded" type="button" class="flex items-center gap-1 text-xs font-medium text-amber-800 dark:text-amber-200 hover:underline">
+                            <div x-data="{ expanded: {{ $fieldComments->isNotEmpty() ? 'true' : 'false' }} }" class="mt-2 bg-white dark:bg-gray-900/20 border border-gray-900 dark:border-white rounded-lg p-3">
+                                <button @click="expanded = !expanded" type="button" class="flex items-center gap-1 text-xs font-medium text-gray-900 dark:text-white hover:underline">
                                     <svg :class="expanded ? 'rotate-90' : ''" class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                     Comments ({{ $fieldComments->count() }})
                                 </button>
