@@ -101,7 +101,7 @@ class FormController extends Controller
 
         $form->load('fields.inputFieldTemplate');
         $missingFields = $form->fields
-            ->filter(fn($field) => $field->inputFieldTemplate->required && ($field->value === null || $field->value === ''))
+            ->filter(fn($field) => $field->inputFieldTemplate->required && ($field->value === null || trim($field->value) === ''))
             ->map(fn($field) => $field->inputFieldTemplate->label);
 
         if ($missingFields->isNotEmpty()) {
