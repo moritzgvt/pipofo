@@ -410,4 +410,48 @@ class FormStatusTest extends TestCase
         $response->assertSeeText($setup['form']->title);
         $response->assertDontSeeText('Unassigned Form');
     }
+
+    public function test_assigned_base_employee_cannot_view_draft_form(): void
+    {
+        $setup = $this->createSetup();
+        $this->assertEquals('draft', $setup['form']->status);
+
+        $this->actingAs($setup['employee'])
+            ->get('/forms/' . $setup['form']->id)
+            ->assertForbidden();
+    }
+
+    public function test_assigned_base_employee_cannot_comment_on_draft_form(): void
+    {
+        $setup = $this->createSetup();
+        $this->assertEquals('draft', $setup['form']->status);
+
+        $this->actingAs($setup['employee'])
+            ->post('/forms/' . $setup['form']->id . '/comments', [
+                'body' => 'Should not work',
+            ])
+            ->assertForbidden();
+    }
+
+    public function test_assigned_base_employee_cannot_view_revisions_of_draft_form(): void
+    {
+        $setup = $this->createSetup();
+        $this->assertEquals('draft', $setup['form']->status);
+
+        $this->actingAs($setup['employee'])
+            ->get('/forms/' . $setup['form']->id . '/revisions')
+            ->assertForbidden();
+    }
+
+    public function test_employee_dashboard_excludes_draft_forms(): void
+    {
+        $setup = $this->createSetup();
+        $this->assertEquals('draft', $setup['form']->status);
+
+        $response = $this->actingAs($setup['employee'])
+            ->get('/dashboard');
+
+        $response->assertOk();
+        $response->assertDontSeeText($setup['form']->title);
+    }
 }

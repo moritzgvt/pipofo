@@ -21,7 +21,10 @@ class CommentController extends Controller
         if ($user->isRequester()) {
             abort_unless($form->user_id === $user->id, 403);
         } elseif ($user->isEmployeeBase()) {
-            abort_unless($form->assignedEmployees->contains('id', $user->id), 403);
+            abort_unless(
+                !$form->isDraft() && $form->assignedEmployees->contains('id', $user->id),
+                403
+            );
         }
 
         Comment::create([
