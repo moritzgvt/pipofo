@@ -18,7 +18,7 @@ class DashboardController extends Controller
             return view('requester.dashboard', compact('myForms', 'corrections', 'templates'));
         }
 
-        $query = Form::forEmployee($user);
+        $query = Form::forEmployee($user)->where('status', '!=', 'draft');
         $submitted = (clone $query)->where('status', 'submitted')->count();
         $correctionsCount = (clone $query)->where('status', 'corrections')->count();
         $completedCount = (clone $query)->whereIn('status', ['accepted', 'declined'])->count();
