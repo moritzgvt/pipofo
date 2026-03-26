@@ -114,37 +114,47 @@
                             {{ $field->value ?: '—' }}
                         </dd>
 
-                        {{-- Field-specific comments --}}
-                        @if($fieldComments->isNotEmpty())
-                            <div class="mt-2 space-y-2">
-                                @foreach($fieldComments as $comment)
-                                    <div class="p-2 rounded-md text-sm {{ $comment->is_employee_comment ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'bg-gray-50 dark:bg-gray-700/50' }}">
-                                        <div class="flex justify-between items-center mb-1">
-                                            <span class="text-xs font-medium {{ $comment->is_employee_comment ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200' }}">
-                                                {{ $comment->user->name }}
-                                                @if($comment->is_employee_comment) <span class="text-xs">(Employee)</span> @endif
-                                            </span>
-                                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
-                                        </div>
-                                        <p class="text-sm text-gray-700 dark:text-gray-300">{{ $comment->body }}</p>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-
-                        {{-- Inline comment form for this field --}}
-                        @if(!$form->isCompleted())
-                            <div x-data="{ open: false }" class="mt-2">
-                                <button @click="open = !open" type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
-                                    <span x-show="!open">Add comment</span>
-                                    <span x-show="open" x-cloak>Cancel</span>
+                        {{-- Field-specific comments (collapsible, visually distinct) --}}
+                        @if($fieldComments->isNotEmpty() || !$form->isCompleted())
+                            <div x-data="{ expanded: {{ $fieldComments->isNotEmpty() ? 'true' : 'false' }} }" class="mt-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                                <button @click="expanded = !expanded" type="button" class="flex items-center gap-1 text-xs font-medium text-amber-800 dark:text-amber-200 hover:underline">
+                                    <svg :class="expanded ? 'rotate-90' : ''" class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    Comments ({{ $fieldComments->count() }})
                                 </button>
-                                <form method="POST" action="{{ route('forms.comments.store', $form) }}" x-show="open" x-cloak class="mt-2">
-                                    @csrf
-                                    <input type="hidden" name="input_field_template_id" value="{{ $field->inputFieldTemplate->id }}">
-                                    <textarea name="body" required rows="2" placeholder="Add a comment for this field..." class="w-full text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
-                                    <button type="submit" class="mt-1 px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-xs">Add Comment</button>
-                                </form>
+                                <div x-show="expanded" x-cloak class="mt-2">
+                                    @if($fieldComments->isNotEmpty())
+                                        <div class="space-y-2">
+                                            @foreach($fieldComments as $comment)
+                                                <div class="p-2 rounded-md text-sm {{ $comment->is_employee_comment ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600' }}">
+                                                    <div class="flex justify-between items-center mb-1">
+                                                        <span class="text-xs font-medium {{ $comment->is_employee_comment ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200' }}">
+                                                            {{ $comment->user->name }}
+                                                            @if($comment->is_employee_comment) <span class="text-xs">(Employee)</span> @endif
+                                                        </span>
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
+                                                    </div>
+                                                    <p class="text-sm text-gray-700 dark:text-gray-300">{{ $comment->body }}</p>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+
+                                    {{-- Inline comment form for this field --}}
+                                    @if(!$form->isCompleted())
+                                        <div x-data="{ showForm: false }" class="mt-2">
+                                            <button @click="showForm = !showForm" type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
+                                                <span x-show="!showForm">Add comment</span>
+                                                <span x-show="showForm" x-cloak>Cancel</span>
+                                            </button>
+                                            <form method="POST" action="{{ route('forms.comments.store', $form) }}" x-show="showForm" x-cloak class="mt-2">
+                                                @csrf
+                                                <input type="hidden" name="input_field_template_id" value="{{ $field->inputFieldTemplate->id }}">
+                                                <textarea name="body" required rows="2" placeholder="Add a comment for this field..." class="w-full text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                                <button type="submit" class="mt-1 px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-xs">Add Comment</button>
+                                            </form>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
                         @endif
                     </div>
