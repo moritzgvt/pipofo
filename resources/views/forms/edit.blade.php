@@ -9,27 +9,15 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <x-flash-message />
 
-            @if($form->comments->where('is_employee_comment', true)->isNotEmpty())
-                <div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                    <h3 class="font-medium text-yellow-800 dark:text-yellow-200 mb-2">Employee Feedback</h3>
-                    @foreach($form->comments->where('is_employee_comment', true)->take(3) as $comment)
-                        <div class="mb-2 text-sm text-yellow-700 dark:text-yellow-300">
-                            <strong>{{ $comment->user->name }}:</strong>
-                            {{ $comment->body }}
-                            @if($comment->inputFieldTemplate)
-                                <span class="text-xs">(re: {{ $comment->inputFieldTemplate->label }})</span>
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-
             <form method="POST" action="{{ route('forms.update', $form) }}" class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
                 @csrf
                 @method('PUT')
 
                 @foreach($form->fields->sortBy(fn($f) => $f->inputFieldTemplate->order) as $field)
-                    @php $template = $field->inputFieldTemplate; @endphp
+                    @php
+                        $template = $field->inputFieldTemplate;
+                        $fieldComments = $form->comments->where('input_field_template_id', $template->id);
+                    @endphp
                     <div class="mb-6">
                         <label for="field_{{ $template->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             {{ $template->label }}
@@ -73,6 +61,52 @@
                             @default
                                 <input type="{{ $template->type === 'number' ? 'number' : ($template->type === 'date' ? 'date' : 'text') }}" name="fields[{{ $template->id }}]" id="field_{{ $template->id }}" value="{{ old('fields.' . $template->id, $field->value) }}" {{ $template->required ? 'required' : '' }} placeholder="{{ $template->placeholder }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                         @endswitch
+
+                        {{-- Field-specific comments --}}
+                        @if($fieldComments->isNotEmpty())
+                            <div class="mt-2 space-y-2">
+                                @foreach($fieldComments as $comment)
+                                    <div class="p-2 rounded-md text-sm {{ $comment->is_employee_comment ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'bg-gray-50 dark:bg-gray-700/50' }}">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <span class="text-xs font-medium {{ $comment->is_employee_comment ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200' }}">
+                                                {{ $comment->user->name }}
+                                                @if($comment->is_employee_comment) <span class="text-xs">(Employee)</span> @endif
+                                            </span>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
+                                        </div>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">{{ $comment->body }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        {{-- Inline comment form for this field (uses fetch to avoid nested forms) --}}
+                        @if(!$form->isCompleted())
+                            <div x-data="{ open: false, body: '', submitting: false, error: '' }" class="mt-2">
+                                <button @click="open = !open" type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
+                                    <span x-show="!open">Add comment</span>
+                                    <span x-show="open" x-cloak>Cancel</span>
+                                </button>
+                                <div x-show="open" x-cloak class="mt-2">
+                                    <textarea x-model="body" rows="2" placeholder="Add a comment for this field..." class="w-full text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                    <p x-show="error" x-text="error" class="mt-1 text-xs text-red-600 dark:text-red-400"></p>
+                                    <button type="button" :disabled="submitting"
+                                        @click="
+                                            if (!body.trim()) { error = 'Comment is required.'; return; }
+                                            submitting = true; error = '';
+                                            fetch('{{ route('forms.comments.store', $form) }}', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                                                body: JSON.stringify({ body: body, input_field_template_id: '{{ $template->id }}' })
+                                            }).then(r => { if (r.ok) { window.location.reload(); } else { error = 'Failed to add comment.'; submitting = false; } }).catch(() => { error = 'Failed to add comment.'; submitting = false; });
+                                        "
+                                        class="mt-1 px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-xs disabled:opacity-50">
+                                        <span x-show="!submitting">Add Comment</span>
+                                        <span x-show="submitting">Saving...</span>
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 @endforeach
 

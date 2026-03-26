@@ -104,6 +104,7 @@
             <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Form Data</h3>
                 @foreach($form->fields->sortBy(fn($f) => $f->inputFieldTemplate->order) as $field)
+                    @php $fieldComments = $form->comments->where('input_field_template_id', $field->inputFieldTemplate->id); @endphp
                     <div class="mb-4 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                             {{ $field->inputFieldTemplate->label }}
@@ -112,15 +113,50 @@
                         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
                             {{ $field->value ?: '—' }}
                         </dd>
+
+                        {{-- Field-specific comments --}}
+                        @if($fieldComments->isNotEmpty())
+                            <div class="mt-2 space-y-2">
+                                @foreach($fieldComments as $comment)
+                                    <div class="p-2 rounded-md text-sm {{ $comment->is_employee_comment ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'bg-gray-50 dark:bg-gray-700/50' }}">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <span class="text-xs font-medium {{ $comment->is_employee_comment ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200' }}">
+                                                {{ $comment->user->name }}
+                                                @if($comment->is_employee_comment) <span class="text-xs">(Employee)</span> @endif
+                                            </span>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
+                                        </div>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">{{ $comment->body }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        {{-- Inline comment form for this field --}}
+                        @if(!$form->isCompleted())
+                            <div x-data="{ open: false }" class="mt-2">
+                                <button @click="open = !open" type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
+                                    <span x-show="!open">Add comment</span>
+                                    <span x-show="open" x-cloak>Cancel</span>
+                                </button>
+                                <form method="POST" action="{{ route('forms.comments.store', $form) }}" x-show="open" x-cloak class="mt-2">
+                                    @csrf
+                                    <input type="hidden" name="input_field_template_id" value="{{ $field->inputFieldTemplate->id }}">
+                                    <textarea name="body" required rows="2" placeholder="Add a comment for this field..." class="w-full text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                    <button type="submit" class="mt-1 px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-xs">Add Comment</button>
+                                </form>
+                            </div>
+                        @endif
                     </div>
                 @endforeach
             </div>
 
-            {{-- Comments --}}
+            {{-- General Comments --}}
+            @php $generalComments = $form->comments->whereNull('input_field_template_id'); @endphp
             <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Comments ({{ $form->comments->count() }})</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">General Comments ({{ $generalComments->count() }})</h3>
 
-                @foreach($form->comments as $comment)
+                @foreach($generalComments as $comment)
                     <div class="mb-4 p-3 rounded-lg {{ $comment->is_employee_comment ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'bg-gray-50 dark:bg-gray-700/50' }}">
                         <div class="flex justify-between items-center mb-1">
                             <span class="text-sm font-medium {{ $comment->is_employee_comment ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200' }}">
@@ -129,9 +165,6 @@
                             </span>
                             <span class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
                         </div>
-                        @if($comment->inputFieldTemplate)
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Re: {{ $comment->inputFieldTemplate->label }}</p>
-                        @endif
                         <p class="text-sm text-gray-700 dark:text-gray-300">{{ $comment->body }}</p>
                     </div>
                 @endforeach
@@ -139,15 +172,7 @@
                 @if(!$form->isCompleted())
                     <form method="POST" action="{{ route('forms.comments.store', $form) }}" class="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
                         @csrf
-                        <div class="mb-3">
-                            <select name="input_field_template_id" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm text-sm" aria-label="Comment on specific field (optional)">
-                                <option value="">General comment</option>
-                                @foreach($form->fields->sortBy(fn($f) => $f->inputFieldTemplate->order) as $field)
-                                    <option value="{{ $field->inputFieldTemplate->id }}">{{ $field->inputFieldTemplate->label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <textarea name="body" required rows="3" placeholder="Add a comment..." class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                        <textarea name="body" required rows="3" placeholder="Add a general comment..." class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                         @error('body') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                         <button type="submit" class="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-sm">Add Comment</button>
                     </form>
