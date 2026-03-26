@@ -22,6 +22,7 @@ class FormController extends Controller
 
     public function store(Request $request, FormTemplate $formTemplate)
     {
+        abort_if(!$formTemplate->is_active, 403);
         $request->validate(['title' => 'required|string|max:255']);
 
         $form = Form::create([
@@ -97,6 +98,16 @@ class FormController extends Controller
             $form->user_id === Auth::id() && ($form->isDraft() || $form->isCorrections()),
             403
         );
+
+        $form->load('fields.inputFieldTemplate');
+        $missingFields = $form->fields
+            ->filter(fn($field) => $field->inputFieldTemplate->required && ($field->value === null || $field->value === ''))
+            ->map(fn($field) => $field->inputFieldTemplate->label);
+
+        if ($missingFields->isNotEmpty()) {
+            return back()->withErrors(['fields' => 'Please fill in all required fields: ' . $missingFields->implode(', ')]);
+        }
+
         $form->update(['status' => 'submitted', 'submitted_at' => now()]);
         return redirect()->route('forms.show', $form)->with('success', 'Form submitted successfully.');
     }
@@ -148,6 +159,13 @@ class FormController extends Controller
         abort_unless(Auth::user()->isManagerOrAdmin(), 403);
         $form->assignedEmployees()->detach($request->employee_id);
         return back()->with('success', 'Employee removed.');
+    }
+
+    public function destroy(Form $form)
+    {
+        abort_unless(Auth::user()->isManagerOrAdmin(), 403);
+        $form->delete();
+        return redirect()->route('dashboard')->with('success', 'Form deleted.');
     }
 
     public function revisions(Form $form)

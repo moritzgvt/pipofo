@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('form-templates', FormTemplateController::class)->except(['show']);
         Route::post('/forms/{form}/assign-employee', [FormController::class, 'assignEmployee'])->name('forms.assign-employee');
         Route::post('/forms/{form}/remove-employee', [FormController::class, 'removeEmployee'])->name('forms.remove-employee');
+        Route::delete('/forms/{form}', [FormController::class, 'destroy'])->name('forms.destroy');
 
         Route::resource('users', UserController::class)->except(['destroy']);
         Route::patch('/users/{user}/toggle-suspend', [UserController::class, 'toggleSuspend'])->name('users.toggle-suspend');
