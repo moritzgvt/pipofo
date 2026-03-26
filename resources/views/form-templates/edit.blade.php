@@ -95,18 +95,21 @@
         </div>
     </div>
 
+    @php
+        $fieldsJson = $formTemplate->inputFieldTemplates->map(fn($f) => [
+            'id' => $f->id,
+            'label' => $f->label,
+            'type' => $f->type,
+            'required' => $f->required,
+            'placeholder' => $f->placeholder ?? '',
+            'help_text' => $f->help_text ?? '',
+            'options' => $f->options ? implode(', ', $f->options) : '',
+        ])->values();
+    @endphp
     <script>
         function formTemplateEditor() {
             return {
-                fields: @json($formTemplate->inputFieldTemplates->map(fn($f) => [
-                    'id' => $f->id,
-                    'label' => $f->label,
-                    'type' => $f->type,
-                    'required' => $f->required,
-                    'placeholder' => $f->placeholder ?? '',
-                    'help_text' => $f->help_text ?? '',
-                    'options' => $f->options ? implode(', ', $f->options) : '',
-                ])->values()),
+                fields: @json($fieldsJson),
                 addField() {
                     this.fields.push({ id: null, label: '', type: 'text', required: false, placeholder: '', help_text: '', options: '' });
                 },
