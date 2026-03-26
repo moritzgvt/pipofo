@@ -22,18 +22,10 @@ class CreateAdminUser extends Command
             return Command::SUCCESS;
         }
 
-        $password = $this->secret('Enter password for the admin user');
-
-        if (empty($password)) {
-            $this->error('Password cannot be empty.');
-
-            return Command::FAILURE;
-        }
-
         User::create([
             'name' => 'Admin',
             'email' => $email,
-            'password' => Hash::make($password),
+            'password' => Hash::make('password'),
             'role' => 'employee_admin',
             'email_verified_at' => now(),
         ]);

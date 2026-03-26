@@ -13,7 +13,6 @@ class CreateAdminUserCommandTest extends TestCase
     public function test_command_creates_admin_user(): void
     {
         $this->artisan('app:create-admin')
-            ->expectsQuestion('Enter password for the admin user', 'securepassword')
             ->expectsOutput('Admin user created successfully with email accounts@moritzgut.de.')
             ->assertExitCode(0);
 
@@ -35,13 +34,13 @@ class CreateAdminUserCommandTest extends TestCase
         $this->assertDatabaseCount('users', 1);
     }
 
-    public function test_command_fails_with_empty_password(): void
+    public function test_admin_user_can_login_with_default_password(): void
     {
-        $this->artisan('app:create-admin')
-            ->expectsQuestion('Enter password for the admin user', '')
-            ->expectsOutput('Password cannot be empty.')
-            ->assertExitCode(1);
+        $this->artisan('app:create-admin')->assertExitCode(0);
 
-        $this->assertDatabaseMissing('users', ['email' => 'accounts@moritzgut.de']);
+        $this->post('/login', [
+            'email' => 'accounts@moritzgut.de',
+            'password' => 'password',
+        ])->assertRedirect('/dashboard');
     }
 }
