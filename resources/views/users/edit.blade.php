@@ -25,8 +25,17 @@
                     </div>
 
                     <div class="mt-4">
-                        <x-input-label :value="__('Role')" />
-                        <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $user->role_label }}</p>
+                        <x-input-label for="role" :value="__('Role')" />
+                        @if(count($availableRoles) > 0 && isset($availableRoles[$user->role]))
+                            <select id="role" name="role" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                @foreach($availableRoles as $value => $label)
+                                    <option value="{{ $value }}" {{ old('role', $user->role) === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error :messages="$errors->get('role')" class="mt-2" />
+                        @else
+                            <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $user->role_label }}</p>
+                        @endif
                     </div>
 
                     <div class="flex items-center justify-end mt-6">

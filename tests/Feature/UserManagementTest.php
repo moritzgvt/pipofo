@@ -71,7 +71,7 @@ class UserManagementTest extends TestCase
         $response->assertSeeText('Requester Person');
     }
 
-    // --- Admin creates manager ---
+    // --- Admin creates any role ---
 
     public function test_admin_can_create_manager(): void
     {
@@ -92,7 +92,7 @@ class UserManagementTest extends TestCase
         ]);
     }
 
-    public function test_admin_cannot_create_employee(): void
+    public function test_admin_can_create_employee(): void
     {
         $admin = User::factory()->create(['role' => 'employee_admin']);
 
@@ -104,7 +104,49 @@ class UserManagementTest extends TestCase
             'role' => 'employee_base',
         ]);
 
-        $response->assertSessionHasErrors('role');
+        $response->assertRedirect(route('users.index'));
+        $this->assertDatabaseHas('users', [
+            'email' => 'employee@example.com',
+            'role' => 'employee_base',
+        ]);
+    }
+
+    public function test_admin_can_create_requester(): void
+    {
+        $admin = User::factory()->create(['role' => 'employee_admin']);
+
+        $response = $this->actingAs($admin)->post(route('users.store'), [
+            'name' => 'New Requester',
+            'email' => 'requester@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'role' => 'requester',
+        ]);
+
+        $response->assertRedirect(route('users.index'));
+        $this->assertDatabaseHas('users', [
+            'email' => 'requester@example.com',
+            'role' => 'requester',
+        ]);
+    }
+
+    public function test_admin_can_create_admin(): void
+    {
+        $admin = User::factory()->create(['role' => 'employee_admin']);
+
+        $response = $this->actingAs($admin)->post(route('users.store'), [
+            'name' => 'New Admin',
+            'email' => 'admin2@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'role' => 'employee_admin',
+        ]);
+
+        $response->assertRedirect(route('users.index'));
+        $this->assertDatabaseHas('users', [
+            'email' => 'admin2@example.com',
+            'role' => 'employee_admin',
+        ]);
     }
 
     // --- Manager creates employee and requester ---
@@ -303,5 +345,80 @@ class UserManagementTest extends TestCase
         $response->assertOk();
         $response->assertSeeText('Created Forms');
         $response->assertSeeText('My Created Form');
+    }
+
+    // --- Role editing ---
+
+    public function test_admin_can_change_user_role(): void
+    {
+        $admin = User::factory()->create(['role' => 'employee_admin']);
+        $user = User::factory()->create(['role' => 'requester']);
+
+        $response = $this->actingAs($admin)->put(route('users.update', $user), [
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => 'employee_base',
+        ]);
+
+        $response->assertRedirect(route('users.show', $user));
+        $this->assertDatabaseHas('users', ['id' => $user->id, 'role' => 'employee_base']);
+    }
+
+    public function test_admin_can_change_user_to_admin(): void
+    {
+        $admin = User::factory()->create(['role' => 'employee_admin']);
+        $user = User::factory()->create(['role' => 'employee_base']);
+
+        $response = $this->actingAs($admin)->put(route('users.update', $user), [
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => 'employee_admin',
+        ]);
+
+        $response->assertRedirect(route('users.show', $user));
+        $this->assertDatabaseHas('users', ['id' => $user->id, 'role' => 'employee_admin']);
+    }
+
+    public function test_manager_can_change_employee_to_requester(): void
+    {
+        $manager = User::factory()->create(['role' => 'employee_manager']);
+        $user = User::factory()->create(['role' => 'employee_base']);
+
+        $response = $this->actingAs($manager)->put(route('users.update', $user), [
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => 'requester',
+        ]);
+
+        $response->assertRedirect(route('users.show', $user));
+        $this->assertDatabaseHas('users', ['id' => $user->id, 'role' => 'requester']);
+    }
+
+    public function test_manager_cannot_change_user_to_manager(): void
+    {
+        $manager = User::factory()->create(['role' => 'employee_manager']);
+        $user = User::factory()->create(['role' => 'employee_base']);
+
+        $response = $this->actingAs($manager)->put(route('users.update', $user), [
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => 'employee_manager',
+        ]);
+
+        $response->assertSessionHasErrors('role');
+    }
+
+    public function test_manager_cannot_change_user_to_admin(): void
+    {
+        $manager = User::factory()->create(['role' => 'employee_manager']);
+        $user = User::factory()->create(['role' => 'requester']);
+
+        $response = $this->actingAs($manager)->put(route('users.update', $user), [
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => 'employee_admin',
+        ]);
+
+        $response->assertSessionHasErrors('role');
     }
 }

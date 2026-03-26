@@ -2,18 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">{{ $user->name }}</h2>
-            <div class="flex items-center space-x-3">
-                <a href="{{ route('users.edit', $user) }}" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-sm">Edit</a>
-                @if($user->id !== auth()->id())
-                    <form method="POST" action="{{ route('users.toggle-suspend', $user) }}">
-                        @csrf
-                        @method('PATCH')
-                        <button type="submit" onclick="return confirm('{{ $user->is_suspended ? 'Reactivate' : 'Suspend' }} this user?')" class="px-4 py-2 {{ $user->is_suspended ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700' }} text-white rounded-md transition text-sm">
-                            {{ $user->is_suspended ? 'Reactivate' : 'Suspend' }}
-                        </button>
-                    </form>
-                @endif
-            </div>
+            <a href="{{ route('users.edit', $user) }}" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-sm">Edit</a>
         </div>
     </x-slot>
 
