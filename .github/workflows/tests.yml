@@ -34,8 +34,19 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
           coverage: none
 
+      - name: Set up Node.js version
+        uses: actions/setup-node@v2
+        with:
+          node-version: '24'
+
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Install Node.js dependencies
+        run: npm install
+
+      - name: Build Frontend assets
+        run: npm run build
 
       - name: Copy environment file
         run: cp .env.example .env
