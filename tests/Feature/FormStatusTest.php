@@ -278,4 +278,136 @@ class FormStatusTest extends TestCase
             ->get('/forms/' . $setup['form']->id)
             ->assertForbidden();
     }
+
+    public function test_unassigned_base_employee_cannot_edit_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+        $unassigned = User::factory()->create(['role' => 'employee_base']);
+
+        $this->actingAs($unassigned)
+            ->get('/forms/' . $setup['form']->id . '/edit')
+            ->assertForbidden();
+    }
+
+    public function test_unassigned_base_employee_cannot_update_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+        $unassigned = User::factory()->create(['role' => 'employee_base']);
+
+        $this->actingAs($unassigned)
+            ->put('/forms/' . $setup['form']->id, [
+                'fields' => [$setup['fieldTemplate']->id => 'Hacked Value'],
+            ])
+            ->assertForbidden();
+    }
+
+    public function test_unassigned_base_employee_cannot_accept_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+        $unassigned = User::factory()->create(['role' => 'employee_base']);
+
+        $this->actingAs($unassigned)
+            ->post('/employee/forms/' . $setup['form']->id . '/accept')
+            ->assertForbidden();
+
+        $setup['form']->refresh();
+        $this->assertEquals('submitted', $setup['form']->status);
+    }
+
+    public function test_unassigned_base_employee_cannot_decline_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+        $unassigned = User::factory()->create(['role' => 'employee_base']);
+
+        $this->actingAs($unassigned)
+            ->post('/employee/forms/' . $setup['form']->id . '/decline')
+            ->assertForbidden();
+
+        $setup['form']->refresh();
+        $this->assertEquals('submitted', $setup['form']->status);
+    }
+
+    public function test_unassigned_base_employee_cannot_request_corrections(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+        $unassigned = User::factory()->create(['role' => 'employee_base']);
+
+        $this->actingAs($unassigned)
+            ->post('/employee/forms/' . $setup['form']->id . '/request-corrections', [
+                'comment' => 'Should not work',
+            ])
+            ->assertForbidden();
+
+        $setup['form']->refresh();
+        $this->assertEquals('submitted', $setup['form']->status);
+    }
+
+    public function test_unassigned_base_employee_cannot_comment_on_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+        $unassigned = User::factory()->create(['role' => 'employee_base']);
+
+        $this->actingAs($unassigned)
+            ->post('/forms/' . $setup['form']->id . '/comments', [
+                'body' => 'Should not work',
+            ])
+            ->assertForbidden();
+    }
+
+    public function test_unassigned_base_employee_cannot_view_revisions(): void
+    {
+        $setup = $this->createSetup();
+        $unassigned = User::factory()->create(['role' => 'employee_base']);
+
+        $this->actingAs($unassigned)
+            ->get('/forms/' . $setup['form']->id . '/revisions')
+            ->assertForbidden();
+    }
+
+    public function test_assigned_base_employee_can_view_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+
+        $this->actingAs($setup['employee'])
+            ->get('/forms/' . $setup['form']->id)
+            ->assertOk();
+    }
+
+    public function test_assigned_base_employee_can_edit_submitted_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+
+        $this->actingAs($setup['employee'])
+            ->get('/forms/' . $setup['form']->id . '/edit')
+            ->assertOk();
+    }
+
+    public function test_employee_submitted_list_only_shows_assigned_forms(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+
+        // Create another submitted form NOT assigned to the employee
+        $otherForm = Form::create([
+            'form_template_id' => $setup['template']->id,
+            'user_id' => $setup['requester']->id,
+            'title' => 'Unassigned Form',
+            'status' => 'submitted',
+        ]);
+
+        $response = $this->actingAs($setup['employee'])
+            ->get('/employee/submitted');
+
+        $response->assertOk();
+        $response->assertSeeText($setup['form']->title);
+        $response->assertDontSeeText('Unassigned Form');
+    }
 }
