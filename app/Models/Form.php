@@ -18,7 +18,7 @@ class Form extends Model
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
     public function formTemplate(): BelongsTo { return $this->belongsTo(FormTemplate::class); }
     public function fields(): HasMany { return $this->hasMany(FormField::class); }
-    public function comments(): HasMany { return $this->hasMany(Comment::class)->latest(); }
+    public function comments(): HasMany { return $this->hasMany(Comment::class)->oldest(); }
     public function revisions(): HasMany { return $this->hasMany(Revision::class)->latest(); }
     public function assignedEmployees(): BelongsToMany { return $this->belongsToMany(User::class, 'form_employees', 'form_id', 'employee_id'); }
 

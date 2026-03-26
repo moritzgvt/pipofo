@@ -32,6 +32,10 @@ class CommentController extends Controller
             'is_employee_comment' => $user->isEmployee(),
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Comment added.']);
+        }
+
         return back()->with('success', 'Comment added.');
     }
 }
