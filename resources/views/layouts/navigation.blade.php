@@ -26,14 +26,8 @@
                     @endif
 
                     @if(auth()->user()->isEmployee())
-                        <x-nav-link :href="route('employee.submitted')" :active="request()->routeIs('employee.submitted')">
-                            {{ __('Submitted Forms') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('employee.corrections')" :active="request()->routeIs('employee.corrections')">
-                            {{ __('Corrections Requested') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('employee.completed')" :active="request()->routeIs('employee.completed')">
-                            {{ __('Completed Forms') }}
+                        <x-nav-link :href="route('employee.forms')" :active="request()->routeIs('employee.forms')">
+                            {{ __('Forms') }}
                         </x-nav-link>
                         @if(auth()->user()->isManagerOrAdmin())
                             <x-nav-link :href="route('form-templates.index')" :active="request()->routeIs('form-templates.*')">
@@ -114,9 +108,7 @@
             @endif
 
             @if(auth()->user()->isEmployee())
-                <x-responsive-nav-link :href="route('employee.submitted')" :active="request()->routeIs('employee.submitted')">{{ __('Submitted Forms') }}</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('employee.corrections')" :active="request()->routeIs('employee.corrections')">{{ __('Corrections Requested') }}</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('employee.completed')" :active="request()->routeIs('employee.completed')">{{ __('Completed Forms') }}</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('employee.forms')" :active="request()->routeIs('employee.forms')">{{ __('Forms') }}</x-responsive-nav-link>
                 @if(auth()->user()->isManagerOrAdmin())
                     <x-responsive-nav-link :href="route('form-templates.index')" :active="request()->routeIs('form-templates.*')">{{ __('Templates') }}</x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">{{ __('Users') }}</x-responsive-nav-link>

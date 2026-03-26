@@ -39,6 +39,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Employee routes
     Route::middleware('role:employee_base,employee_manager,employee_admin')->prefix('employee')->name('employee.')->group(function () {
+        Route::get('/forms', [EmployeeController::class, 'forms'])->name('forms');
         Route::get('/submitted', [EmployeeController::class, 'submittedForms'])->name('submitted');
         Route::get('/corrections', [EmployeeController::class, 'correctionsRequested'])->name('corrections');
         Route::get('/completed', [EmployeeController::class, 'completedForms'])->name('completed');
