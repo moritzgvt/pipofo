@@ -454,4 +454,114 @@ class FormStatusTest extends TestCase
         $response->assertOk();
         $response->assertDontSeeText($setup['form']->title);
     }
+
+    public function test_requester_cannot_store_form_from_inactive_template(): void
+    {
+        $setup = $this->createSetup();
+        $setup['template']->update(['is_active' => false]);
+
+        $this->actingAs($setup['requester'])
+            ->post('/requester/forms/create/' . $setup['template']->id, [
+                'title' => 'Should Not Work',
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('forms', ['title' => 'Should Not Work']);
+    }
+
+    public function test_requester_cannot_submit_form_with_empty_required_fields(): void
+    {
+        $setup = $this->createSetup();
+        // Make field required
+        $setup['fieldTemplate']->update(['required' => true]);
+
+        // Value is null (not filled in)
+        $this->actingAs($setup['requester'])
+            ->post('/forms/' . $setup['form']->id . '/submit')
+            ->assertRedirect()
+            ->assertSessionHasErrors('fields')
+            ->assertSessionHas('missing_fields', [$setup['fieldTemplate']->id]);
+
+        $setup['form']->refresh();
+        $this->assertEquals('draft', $setup['form']->status);
+    }
+
+    public function test_requester_can_submit_form_with_filled_required_fields(): void
+    {
+        $setup = $this->createSetup();
+        $setup['fieldTemplate']->update(['required' => true]);
+
+        // Fill in the required field
+        FormField::where('form_id', $setup['form']->id)
+            ->where('input_field_template_id', $setup['fieldTemplate']->id)
+            ->update(['value' => 'Filled Value']);
+
+        $this->actingAs($setup['requester'])
+            ->post('/forms/' . $setup['form']->id . '/submit')
+            ->assertRedirect();
+
+        $setup['form']->refresh();
+        $this->assertEquals('submitted', $setup['form']->status);
+    }
+
+    public function test_requester_can_save_form_with_empty_required_fields(): void
+    {
+        $setup = $this->createSetup();
+        $setup['fieldTemplate']->update(['required' => true]);
+
+        // Save (update) with empty required field should succeed
+        $this->actingAs($setup['requester'])
+            ->put('/forms/' . $setup['form']->id, [
+                'fields' => [$setup['fieldTemplate']->id => ''],
+            ])
+            ->assertRedirect();
+
+        $setup['form']->refresh();
+        $this->assertEquals('draft', $setup['form']->status);
+    }
+
+    public function test_manager_can_delete_form(): void
+    {
+        $setup = $this->createSetup();
+
+        $this->actingAs($setup['manager'])
+            ->delete('/forms/' . $setup['form']->id)
+            ->assertRedirect(route('dashboard'));
+
+        $this->assertDatabaseMissing('forms', ['id' => $setup['form']->id]);
+    }
+
+    public function test_admin_can_delete_form(): void
+    {
+        $setup = $this->createSetup();
+        $admin = User::factory()->create(['role' => 'employee_admin']);
+
+        $this->actingAs($admin)
+            ->delete('/forms/' . $setup['form']->id)
+            ->assertRedirect(route('dashboard'));
+
+        $this->assertDatabaseMissing('forms', ['id' => $setup['form']->id]);
+    }
+
+    public function test_requester_cannot_delete_form(): void
+    {
+        $setup = $this->createSetup();
+
+        $this->actingAs($setup['requester'])
+            ->delete('/forms/' . $setup['form']->id)
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('forms', ['id' => $setup['form']->id]);
+    }
+
+    public function test_employee_cannot_delete_form(): void
+    {
+        $setup = $this->createSetup();
+
+        $this->actingAs($setup['employee'])
+            ->delete('/forms/' . $setup['form']->id)
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('forms', ['id' => $setup['form']->id]);
+    }
 }
