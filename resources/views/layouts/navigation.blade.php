@@ -13,18 +13,6 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    @if(auth()->user()->isRequester())
-                        <x-nav-link :href="route('requester.available-forms')" :active="request()->routeIs('requester.available-forms')">
-                            {{ __('Available Forms') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('requester.my-forms')" :active="request()->routeIs('requester.my-forms')">
-                            {{ __('My Forms') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('requester.pending-corrections')" :active="request()->routeIs('requester.pending-corrections')">
-                            {{ __('Pending Corrections') }}
-                        </x-nav-link>
-                    @endif
-
                     @if(auth()->user()->isEmployee())
                         <x-nav-link :href="route('employee.forms')" :active="request()->routeIs('employee.forms')">
                             {{ __('Forms') }}
@@ -38,6 +26,16 @@
                             </x-nav-link>
                         @endif
                     @endif
+
+                    <x-nav-link :href="route('requester.available-forms')" :active="request()->routeIs('requester.available-forms')">
+                        {{ __('Available Forms') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('requester.my-forms')" :active="request()->routeIs('requester.my-forms')">
+                        {{ __('My Forms') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('requester.pending-corrections')" :active="request()->routeIs('requester.pending-corrections')">
+                        {{ __('Pending Corrections') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -101,12 +99,6 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            @if(auth()->user()->isRequester())
-                <x-responsive-nav-link :href="route('requester.available-forms')" :active="request()->routeIs('requester.available-forms')">{{ __('Available Forms') }}</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('requester.my-forms')" :active="request()->routeIs('requester.my-forms')">{{ __('My Forms') }}</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('requester.pending-corrections')" :active="request()->routeIs('requester.pending-corrections')">{{ __('Pending Corrections') }}</x-responsive-nav-link>
-            @endif
-
             @if(auth()->user()->isEmployee())
                 <x-responsive-nav-link :href="route('employee.forms')" :active="request()->routeIs('employee.forms')">{{ __('Forms') }}</x-responsive-nav-link>
                 @if(auth()->user()->isManagerOrAdmin())
@@ -114,6 +106,10 @@
                     <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">{{ __('Users') }}</x-responsive-nav-link>
                 @endif
             @endif
+
+            <x-responsive-nav-link :href="route('requester.available-forms')" :active="request()->routeIs('requester.available-forms')">{{ __('Available Forms') }}</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('requester.my-forms')" :active="request()->routeIs('requester.my-forms')">{{ __('My Forms') }}</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('requester.pending-corrections')" :active="request()->routeIs('requester.pending-corrections')">{{ __('Pending Corrections') }}</x-responsive-nav-link>
         </div>
 
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">

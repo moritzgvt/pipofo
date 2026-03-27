@@ -183,22 +183,26 @@ class FormController extends Controller
     private function authorizeView(Form $form): void
     {
         $user = Auth::user();
-        if ($user->isRequester()) {
-            abort_unless($form->user_id === $user->id, 403);
-        } elseif ($user->isEmployeeBase()) {
+        if ($form->user_id === $user->id) {
+            return; // Form owners can always view their own forms
+        }
+        if ($user->isEmployeeBase()) {
             abort_unless(
                 !$form->isDraft() && $form->assignedEmployees->contains('id', $user->id),
                 403
             );
+        } elseif (!$user->isManagerOrAdmin()) {
+            abort(403);
         }
     }
 
     private function authorizeEdit(Form $form): void
     {
         $user = Auth::user();
-        if ($user->isRequester()) {
-            abort_unless($form->user_id === $user->id && $form->isEditable(), 403);
-        } elseif ($user->isEmployee()) {
+        if ($form->user_id === $user->id && $form->isEditable()) {
+            return; // Form owners can edit their own draft/corrections forms
+        }
+        if ($user->isEmployee()) {
             abort_unless($form->isSubmitted(), 403);
             $this->authorizeEmployeeAccess($form);
         } else {
