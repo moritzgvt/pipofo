@@ -682,7 +682,7 @@ class FormStatusTest extends TestCase
     public function test_manager_can_restore_deleted_form(): void
     {
         $setup = $this->createSetup();
-        $setup['form']->update(['status' => 'deleted']);
+        $setup['form']->update(['status' => 'deleted', 'previous_status' => 'draft']);
 
         $this->actingAs($setup['manager'])
             ->post('/forms/' . $setup['form']->id . '/restore')
@@ -690,13 +690,14 @@ class FormStatusTest extends TestCase
 
         $setup['form']->refresh();
         $this->assertEquals('draft', $setup['form']->status);
+        $this->assertNull($setup['form']->previous_status);
     }
 
     public function test_admin_can_restore_deleted_form(): void
     {
         $setup = $this->createSetup();
         $admin = User::factory()->create(['role' => 'employee_admin']);
-        $setup['form']->update(['status' => 'deleted']);
+        $setup['form']->update(['status' => 'deleted', 'previous_status' => 'draft']);
 
         $this->actingAs($admin)
             ->post('/forms/' . $setup['form']->id . '/restore')
@@ -704,6 +705,7 @@ class FormStatusTest extends TestCase
 
         $setup['form']->refresh();
         $this->assertEquals('draft', $setup['form']->status);
+        $this->assertNull($setup['form']->previous_status);
     }
 
     public function test_requester_cannot_restore_form(): void
@@ -742,5 +744,37 @@ class FormStatusTest extends TestCase
 
         $setup['form']->refresh();
         $this->assertEquals('draft', $setup['form']->status);
+    }
+
+    public function test_restore_returns_to_previous_status(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted', 'submitted_at' => now()]);
+
+        $this->actingAs($setup['manager'])
+            ->delete('/forms/' . $setup['form']->id);
+
+        $setup['form']->refresh();
+        $this->assertEquals('deleted', $setup['form']->status);
+        $this->assertEquals('submitted', $setup['form']->previous_status);
+
+        $this->actingAs($setup['manager'])
+            ->post('/forms/' . $setup['form']->id . '/restore');
+
+        $setup['form']->refresh();
+        $this->assertEquals('submitted', $setup['form']->status);
+        $this->assertNull($setup['form']->previous_status);
+    }
+
+    public function test_delete_stores_previous_status(): void
+    {
+        $setup = $this->createSetup();
+
+        $this->actingAs($setup['requester'])
+            ->delete('/forms/' . $setup['form']->id);
+
+        $setup['form']->refresh();
+        $this->assertEquals('deleted', $setup['form']->status);
+        $this->assertEquals('draft', $setup['form']->previous_status);
     }
 }

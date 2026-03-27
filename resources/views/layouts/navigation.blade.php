@@ -35,9 +35,6 @@
                 {{ __('Forms') }}
             </x-nav-link>
             @if(auth()->user()->isManagerOrAdmin())
-                            <x-nav-link :href="route('employee.deleted')" :active="request()->routeIs('employee.deleted')">
-                                {{ __('Gelöschte Formulare') }}
-                            </x-nav-link>
                 <x-nav-link :href="route('form-templates.index')" :active="request()->routeIs('form-templates.*')">
                     <svg class="shrink-0 h-5 w-5 me-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm0 8a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zm0 8a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2z" /></svg>
                     {{ __('Templates') }}

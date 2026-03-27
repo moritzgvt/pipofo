@@ -12,7 +12,7 @@ class Form extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['form_template_id', 'user_id', 'title', 'status', 'submitted_at', 'completed_at'];
+    protected $fillable = ['form_template_id', 'user_id', 'title', 'status', 'previous_status', 'submitted_at', 'completed_at'];
     protected $casts = ['submitted_at' => 'datetime', 'completed_at' => 'datetime'];
 
     public function user(): BelongsTo { return $this->belongsTo(User::class); }

@@ -171,12 +171,12 @@ class FormController extends Controller
 
         if ($user->isRequester()) {
             abort_unless($form->user_id === $user->id && $form->isDraft(), 403);
-            $form->update(['status' => 'deleted']);
+            $form->update(['previous_status' => $form->status, 'status' => 'deleted']);
             return redirect()->route('requester.my-forms')->with('success', 'Form deleted.');
         }
 
         abort_unless($user->isManagerOrAdmin(), 403);
-        $form->update(['status' => 'deleted']);
+        $form->update(['previous_status' => $form->status, 'status' => 'deleted']);
         return redirect()->route('employee.forms')->with('success', 'Form deleted.');
     }
 
@@ -185,7 +185,8 @@ class FormController extends Controller
         abort_unless(Auth::user()->isManagerOrAdmin(), 403);
         abort_unless($form->isDeleted(), 403);
 
-        $form->update(['status' => 'draft']);
+        $restoredStatus = $form->previous_status ?? 'draft';
+        $form->update(['status' => $restoredStatus, 'previous_status' => null]);
         return redirect()->route('forms.show', $form)->with('success', 'Form restored.');
     }
 
