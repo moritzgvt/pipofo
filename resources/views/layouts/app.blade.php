@@ -20,7 +20,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex">
+        <div x-data="{ sidebarOpen: false }" class="min-h-screen bg-gray-100 dark:bg-gray-900 flex">
             @include('layouts.navigation')
 
             <!-- Main Content -->
@@ -31,7 +31,7 @@
                         pipofo
                     </a>
                     <button
-                        onclick="document.getElementById('sidebar-backdrop').classList.remove('hidden'); document.getElementById('mobile-sidebar').classList.remove('-translate-x-full');"
+                        @click="sidebarOpen = true"
                         class="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                         aria-label="Open sidebar"
                     >

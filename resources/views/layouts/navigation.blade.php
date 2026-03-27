@@ -97,22 +97,31 @@
 </aside>
 
 <!-- Mobile Sidebar Overlay -->
-<div id="sidebar-backdrop" class="sm:hidden hidden fixed inset-0 z-40">
+<div x-show="sidebarOpen" x-cloak class="sm:hidden fixed inset-0 z-40">
     <!-- Backdrop -->
     <div
         class="fixed inset-0 bg-gray-600/75"
-        onclick="document.getElementById('sidebar-backdrop').classList.add('hidden'); document.getElementById('mobile-sidebar').classList.add('-translate-x-full');"
+        @click="sidebarOpen = false"
     ></div>
 
     <!-- Mobile Sidebar -->
-    <aside id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 transform -translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col">
+    <aside
+        x-show="sidebarOpen"
+        x-transition:enter="transition ease-in-out duration-300"
+        x-transition:enter-start="-translate-x-full"
+        x-transition:enter-end="translate-x-0"
+        x-transition:leave="transition ease-in-out duration-300"
+        x-transition:leave-start="translate-x-0"
+        x-transition:leave-end="-translate-x-full"
+        class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 z-50 flex flex-col"
+    >
         <!-- Logo & Close -->
         <div class="flex items-center justify-between h-14 px-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
             <a href="{{ route('dashboard') }}" class="text-xl font-bold text-indigo-600 dark:text-indigo-400">
                 pipofo
             </a>
             <button
-                onclick="document.getElementById('sidebar-backdrop').classList.add('hidden'); document.getElementById('mobile-sidebar').classList.add('-translate-x-full');"
+                @click="sidebarOpen = false"
                 class="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 aria-label="Close sidebar"
             >
