@@ -3,11 +3,68 @@
 namespace App\Http\Controllers;
 
 use App\Models\Form;
+use App\Models\FormTemplate;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class EmployeeController extends Controller
 {
+    public function forms(Request $request)
+    {
+        $query = Form::forEmployee(Auth::user())
+            ->where('status', '!=', 'draft')
+            ->with('formTemplate', 'user', 'assignedEmployees');
+
+        if ($request->filled('status') && in_array($request->status, ['submitted', 'corrections', 'accepted', 'declined'])) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('template')) {
+            $query->where('form_template_id', $request->template);
+        }
+
+        if ($request->filled('creator')) {
+            $query->where('user_id', $request->creator);
+        }
+
+        if ($request->filled('assigned')) {
+            $query->whereHas('assignedEmployees', fn($q) => $q->where('employee_id', $request->assigned));
+        }
+
+        if ($request->filled('submitted_from')) {
+            $query->whereDate('submitted_at', '>=', $request->submitted_from);
+        }
+        if ($request->filled('submitted_to')) {
+            $query->whereDate('submitted_at', '<=', $request->submitted_to);
+        }
+
+        if ($request->filled('updated_from')) {
+            $query->whereDate('updated_at', '>=', $request->updated_from);
+        }
+        if ($request->filled('updated_to')) {
+            $query->whereDate('updated_at', '<=', $request->updated_to);
+        }
+
+        $sortField = 'updated_at';
+        $sortDir = 'desc';
+        if ($request->filled('sort') && in_array($request->sort, ['submitted_at', 'updated_at'])) {
+            $sortField = $request->sort;
+        }
+        if ($request->filled('direction') && in_array($request->direction, ['asc', 'desc'])) {
+            $sortDir = $request->direction;
+        }
+        $query->orderBy($sortField, $sortDir);
+
+        $forms = $query->paginate(15)->withQueryString();
+
+        $templates = FormTemplate::orderBy('name')->get();
+        $creators = User::whereHas('forms', fn($q) => $q->where('status', '!=', 'draft'))->orderBy('name')->get();
+        $employees = User::whereIn('role', ['employee_base', 'employee_manager', 'employee_admin'])->orderBy('name')->get();
+
+        return view('employee.forms', compact('forms', 'templates', 'creators', 'employees'));
+    }
+
     public function submittedForms(Request $request)
     {
         $query = Form::forEmployee(Auth::user())
