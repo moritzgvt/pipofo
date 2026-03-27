@@ -1,6 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">{{ __('Forms') }}</h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">{{ __('Forms') }}</h2>
+            @if(auth()->user()->isManagerOrAdmin())
+                <a href="{{ route('employee.deleted') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:underline">
+                    {{ __('Deleted Forms') }} &rarr;
+                </a>
+            @endif
+        </div>
     </x-slot>
 
     <div class="py-12">
@@ -124,14 +131,6 @@
                     @endforeach
                 </div>
                 <div class="mt-6">{{ $forms->links() }}</div>
-            @endif
-
-            @if(auth()->user()->isManagerOrAdmin())
-                <div class="mt-6 text-right">
-                    <a href="{{ route('employee.deleted') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:underline">
-                        {{ __('View Deleted Forms') }} &rarr;
-                    </a>
-                </div>
             @endif
         </div>
     </div>
