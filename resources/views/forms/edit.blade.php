@@ -31,10 +31,10 @@
 
                         @switch($template->type)
                             @case('textarea')
-                                <textarea name="fields[{{ $template->id }}]" id="field_{{ $template->id }}" rows="4" {{ $template->required ? 'required' : '' }} placeholder="{{ $template->placeholder }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('fields.' . $template->id, $field->value) }}</textarea>
+                                <textarea name="fields[{{ $template->id }}]" id="field_{{ $template->id }}" rows="4" placeholder="{{ $template->placeholder }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('fields.' . $template->id, $field->value) }}</textarea>
                                 @break
                             @case('select')
-                                <select name="fields[{{ $template->id }}]" id="field_{{ $template->id }}" {{ $template->required ? 'required' : '' }} class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <select name="fields[{{ $template->id }}]" id="field_{{ $template->id }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                                     <option value="">-- Select --</option>
                                     @foreach($template->options ?? [] as $option)
                                         <option value="{{ $option }}" {{ old('fields.' . $template->id, $field->value) == $option ? 'selected' : '' }}>{{ $option }}</option>
@@ -61,7 +61,7 @@
                                 </div>
                                 @break
                             @default
-                                <input type="{{ $template->type === 'number' ? 'number' : ($template->type === 'date' ? 'date' : 'text') }}" name="fields[{{ $template->id }}]" id="field_{{ $template->id }}" value="{{ old('fields.' . $template->id, $field->value) }}" {{ $template->required ? 'required' : '' }} placeholder="{{ $template->placeholder }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <input type="{{ $template->type === 'number' ? 'number' : ($template->type === 'date' ? 'date' : 'text') }}" name="fields[{{ $template->id }}]" id="field_{{ $template->id }}" value="{{ old('fields.' . $template->id, $field->value) }}" placeholder="{{ $template->placeholder }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                         @endswitch
 
                         {{-- Field-specific comments (collapsible, visually distinct) --}}

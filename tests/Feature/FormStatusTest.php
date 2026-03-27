@@ -502,6 +502,22 @@ class FormStatusTest extends TestCase
         $this->assertEquals('submitted', $setup['form']->status);
     }
 
+    public function test_requester_can_save_form_with_empty_required_fields(): void
+    {
+        $setup = $this->createSetup();
+        $setup['fieldTemplate']->update(['required' => true]);
+
+        // Save (update) with empty required field should succeed
+        $this->actingAs($setup['requester'])
+            ->put('/forms/' . $setup['form']->id, [
+                'fields' => [$setup['fieldTemplate']->id => ''],
+            ])
+            ->assertRedirect();
+
+        $setup['form']->refresh();
+        $this->assertEquals('draft', $setup['form']->status);
+    }
+
     public function test_manager_can_delete_form(): void
     {
         $setup = $this->createSetup();
