@@ -12,7 +12,7 @@ class Form extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['form_template_id', 'user_id', 'title', 'status', 'submitted_at', 'completed_at'];
+    protected $fillable = ['form_template_id', 'user_id', 'title', 'status', 'previous_status', 'submitted_at', 'completed_at'];
     protected $casts = ['submitted_at' => 'datetime', 'completed_at' => 'datetime'];
 
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
@@ -27,6 +27,7 @@ class Form extends Model
     public function isAccepted(): bool { return $this->status === 'accepted'; }
     public function isDeclined(): bool { return $this->status === 'declined'; }
     public function isCorrections(): bool { return $this->status === 'corrections'; }
+    public function isDeleted(): bool { return $this->status === 'deleted'; }
     public function isCompleted(): bool { return in_array($this->status, ['accepted', 'declined']); }
     public function isEditable(): bool { return in_array($this->status, ['draft', 'corrections']); }
 
@@ -38,6 +39,7 @@ class Form extends Model
             'accepted' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
             'declined' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
             'corrections' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+            'deleted' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
             default => 'bg-gray-100 text-gray-800',
         };
     }
@@ -50,6 +52,7 @@ class Form extends Model
             'accepted' => 'Accepted',
             'declined' => 'Declined',
             'corrections' => 'Corrections Requested',
+            'deleted' => 'Deleted',
             default => ucfirst($this->status),
         };
     }

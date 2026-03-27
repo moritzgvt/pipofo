@@ -167,9 +167,27 @@ class FormController extends Controller
 
     public function destroy(Form $form)
     {
+        $user = Auth::user();
+
+        if ($user->isRequester()) {
+            abort_unless($form->user_id === $user->id && $form->isDraft(), 403);
+            $form->update(['previous_status' => $form->status, 'status' => 'deleted']);
+            return redirect()->route('requester.my-forms')->with('success', 'Form deleted.');
+        }
+
+        abort_unless($user->isManagerOrAdmin(), 403);
+        $form->update(['previous_status' => $form->status, 'status' => 'deleted']);
+        return redirect()->route('employee.forms')->with('success', 'Form deleted.');
+    }
+
+    public function restore(Form $form)
+    {
         abort_unless(Auth::user()->isManagerOrAdmin(), 403);
-        $form->delete();
-        return redirect()->route('dashboard')->with('success', 'Form deleted.');
+        abort_unless($form->isDeleted(), 403);
+
+        $restoredStatus = $form->previous_status ?? 'draft';
+        $form->update(['status' => $restoredStatus, 'previous_status' => null]);
+        return redirect()->route('forms.show', $form)->with('success', 'Form restored.');
     }
 
     public function revisions(Form $form)
@@ -183,6 +201,10 @@ class FormController extends Controller
     private function authorizeView(Form $form): void
     {
         $user = Auth::user();
+        if ($form->isDeleted()) {
+            abort_unless($user->isManagerOrAdmin(), 403);
+            return;
+        }
         if ($user->isRequester()) {
             abort_unless($form->user_id === $user->id, 403);
         } elseif ($user->isEmployeeBase()) {
@@ -196,6 +218,7 @@ class FormController extends Controller
     private function authorizeEdit(Form $form): void
     {
         $user = Auth::user();
+        abort_if($form->isDeleted(), 403);
         if ($user->isRequester()) {
             abort_unless($form->user_id === $user->id && $form->isEditable(), 403);
         } elseif ($user->isEmployee()) {
