@@ -34,52 +34,64 @@
 
                     <div class="space-y-4">
                         <template x-for="(field, index) in fields" :key="index">
-                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 relative">
-                                <div class="absolute top-2 right-2 flex items-center gap-1">
-                                    <button type="button" @click="moveUp(index)" x-show="index > 0" class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition text-sm" aria-label="Move field up">&uarr;</button>
-                                    <button type="button" @click="moveDown(index)" x-show="index < fields.length - 1" class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition text-sm" aria-label="Move field down">&darr;</button>
-                                    <button type="button" @click="removeField(index)" x-show="fields.length > 1" class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 dark:border-red-500 bg-white dark:bg-gray-700 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition text-sm" aria-label="Remove field">&times;</button>
-                                </div>
-                                <input type="hidden" :name="'fields[' + index + '][id]'" :value="field.id || ''">
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Label</label>
-                                        <input type="text" :name="'fields[' + index + '][label]'" x-model="field.label" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden" x-data="{ open: true }">
+                                <!-- Card Header -->
+                                <div class="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700/50 cursor-pointer select-none" role="button" tabindex="0" :aria-expanded="open" @click="open = !open" @keydown.enter.prevent="open = !open" @keydown.space.prevent="open = !open">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-400 dark:text-gray-500 text-xs transition-transform" :class="open ? 'rotate-90' : ''" aria-hidden="true">&#9654;</span>
+                                        <span class="font-medium text-sm text-gray-700 dark:text-gray-300" x-text="field.label || 'Field ' + (index + 1)"></span>
+                                        <span class="text-xs text-gray-400 dark:text-gray-500" x-text="'(' + field.type + ')'"></span>
                                     </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
-                                        <select :name="'fields[' + index + '][type]'" x-model="field.type" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                                            <option value="text">Text</option>
-                                            <option value="textarea">Textarea</option>
-                                            <option value="number">Number</option>
-                                            <option value="date">Date</option>
-                                            <option value="select">Select</option>
-                                            <option value="checkbox">Checkbox</option>
-                                            <option value="radio">Radio</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Placeholder</label>
-                                        <input type="text" :name="'fields[' + index + '][placeholder]'" x-model="field.placeholder" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Help Text</label>
-                                        <input type="text" :name="'fields[' + index + '][help_text]'" x-model="field.help_text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                    <div class="flex items-center gap-1" @click.stop>
+                                        <button type="button" @click="moveUp(index)" x-show="index > 0" class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition text-sm" aria-label="Move field up">&uarr;</button>
+                                        <button type="button" @click="moveDown(index)" x-show="index < fields.length - 1" class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition text-sm" aria-label="Move field down">&darr;</button>
+                                        <button type="button" @click="removeField(index)" x-show="fields.length > 1" class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 dark:border-red-500 bg-white dark:bg-gray-700 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition text-sm" aria-label="Remove field">&times;</button>
                                     </div>
                                 </div>
 
-                                <div class="mt-3 flex items-center gap-4">
-                                    <label class="inline-flex items-center">
-                                        <input type="hidden" :name="'fields[' + index + '][required]'" value="0">
-                                        <input type="checkbox" :name="'fields[' + index + '][required]'" x-model="field.required" value="1" class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                                        <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">Required</span>
-                                    </label>
-                                </div>
+                                <!-- Collapsible Body -->
+                                <div x-show="open" x-transition class="p-4 border-t border-gray-200 dark:border-gray-700">
+                                    <input type="hidden" :name="'fields[' + index + '][id]'" :value="field.id || ''">
 
-                                <div x-show="['select', 'radio'].includes(field.type)" class="mt-3">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Options (comma-separated)</label>
-                                    <input type="text" :name="'fields[' + index + '][options]'" x-model="field.options" placeholder="Option 1, Option 2" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Label</label>
+                                            <input type="text" :name="'fields[' + index + '][label]'" x-model="field.label" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+                                            <select :name="'fields[' + index + '][type]'" x-model="field.type" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                                <option value="text">Text</option>
+                                                <option value="textarea">Textarea</option>
+                                                <option value="number">Number</option>
+                                                <option value="date">Date</option>
+                                                <option value="select">Select</option>
+                                                <option value="checkbox">Checkbox</option>
+                                                <option value="radio">Radio</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Placeholder</label>
+                                            <input type="text" :name="'fields[' + index + '][placeholder]'" x-model="field.placeholder" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Help Text</label>
+                                            <input type="text" :name="'fields[' + index + '][help_text]'" x-model="field.help_text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 flex items-center gap-4">
+                                        <label class="inline-flex items-center">
+                                            <input type="hidden" :name="'fields[' + index + '][required]'" value="0">
+                                            <input type="checkbox" :name="'fields[' + index + '][required]'" x-model="field.required" value="1" class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                            <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">Required</span>
+                                        </label>
+                                    </div>
+
+                                    <div x-show="['select', 'radio'].includes(field.type)" class="mt-3">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Options (comma-separated)</label>
+                                        <input type="text" :name="'fields[' + index + '][options]'" x-model="field.options" placeholder="Option 1, Option 2" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                    </div>
                                 </div>
                             </div>
                         </template>
