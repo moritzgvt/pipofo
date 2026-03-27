@@ -29,9 +29,9 @@
                         <template x-for="(field, index) in fields" :key="index">
                             <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 relative">
                                 <div class="absolute top-2 right-2 flex items-center gap-1">
-                                    <button type="button" @click="moveUp(index)" x-show="index > 0" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1" aria-label="Move field up">&uarr;</button>
-                                    <button type="button" @click="moveDown(index)" x-show="index < fields.length - 1" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1" aria-label="Move field down">&darr;</button>
-                                    <button type="button" @click="removeField(index)" x-show="fields.length > 1" class="text-red-500 hover:text-red-700 p-1" aria-label="Remove field">&times;</button>
+                                    <button type="button" @click="moveUp(index)" x-show="index > 0" class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition text-sm" aria-label="Move field up">&uarr;</button>
+                                    <button type="button" @click="moveDown(index)" x-show="index < fields.length - 1" class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition text-sm" aria-label="Move field down">&darr;</button>
+                                    <button type="button" @click="removeField(index)" x-show="fields.length > 1" class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 dark:border-red-500 bg-white dark:bg-gray-700 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition text-sm" aria-label="Remove field">&times;</button>
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
