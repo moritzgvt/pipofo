@@ -10,6 +10,9 @@
             @if($form->user)
                 &middot; by {{ $form->user->name }}
             @endif
+            @if($form->relationLoaded('assignedEmployees') && $form->assignedEmployees->isNotEmpty())
+                &middot; {{ __('assigned to') }} {{ $form->assignedEmployees->pluck('name')->join(', ') }}
+            @endif
         </p>
     </div>
     <div class="ml-4 flex-shrink-0">
