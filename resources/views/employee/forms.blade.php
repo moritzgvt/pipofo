@@ -125,6 +125,14 @@
                 </div>
                 <div class="mt-6">{{ $forms->links() }}</div>
             @endif
+
+            @if(auth()->user()->isManagerOrAdmin())
+                <div class="mt-6 text-right">
+                    <a href="{{ route('employee.deleted') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:underline">
+                        {{ __('View Deleted Forms') }} &rarr;
+                    </a>
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

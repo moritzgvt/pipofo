@@ -1,11 +1,17 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">{{ __('Gelöschte Formulare') }}</h2>
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">{{ __('Deleted Forms') }}</h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <x-flash-message />
+
+            <div class="mb-6">
+                <a href="{{ route('employee.forms') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:underline">
+                    &larr; {{ __('Back to Forms') }}
+                </a>
+            </div>
 
             <form method="GET" action="{{ route('employee.deleted') }}" class="mb-6">
                 <div class="flex gap-4 items-end flex-wrap">
@@ -23,7 +29,27 @@
             @else
                 <div class="space-y-3">
                     @foreach($forms as $form)
-                        <x-form-list-item :form="$form" />
+                        <div class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                            <div class="flex-1 min-w-0">
+                                <a href="{{ route('forms.show', $form) }}" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline truncate">
+                                    {{ $form->title }}
+                                </a>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    {{ $form->formTemplate->name ?? 'Unknown Template' }}
+                                    &middot; {{ $form->created_at->format('M d, Y') }}
+                                    @if($form->user)
+                                        &middot; by {{ $form->user->name }}
+                                    @endif
+                                </p>
+                            </div>
+                            <div class="ml-4 flex-shrink-0 flex items-center gap-2">
+                                <x-status-badge :status="$form->status" />
+                                <form method="POST" action="{{ route('forms.restore', $form) }}" class="inline">
+                                    @csrf
+                                    <button type="submit" onclick="return confirm('Restore this form?')" class="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition text-xs">Restore</button>
+                                </form>
+                            </div>
+                        </div>
                     @endforeach
                 </div>
                 <div class="mt-6">{{ $forms->links() }}</div>

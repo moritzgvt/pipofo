@@ -146,7 +146,7 @@
                             <button type="button"
                                 onclick="if(confirm('Are you sure you want to delete this form?')) { document.getElementById('delete-form').submit(); }"
                                 class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800">
-                                {{ __('Löschen') }}
+                                {{ __('Delete') }}
                             </button>
                         @endif
                     </div>

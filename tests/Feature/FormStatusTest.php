@@ -678,4 +678,69 @@ class FormStatusTest extends TestCase
         $response->assertOk();
         $response->assertDontSeeText($setup['form']->title);
     }
+
+    public function test_manager_can_restore_deleted_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'deleted']);
+
+        $this->actingAs($setup['manager'])
+            ->post('/forms/' . $setup['form']->id . '/restore')
+            ->assertRedirect(route('forms.show', $setup['form']));
+
+        $setup['form']->refresh();
+        $this->assertEquals('draft', $setup['form']->status);
+    }
+
+    public function test_admin_can_restore_deleted_form(): void
+    {
+        $setup = $this->createSetup();
+        $admin = User::factory()->create(['role' => 'employee_admin']);
+        $setup['form']->update(['status' => 'deleted']);
+
+        $this->actingAs($admin)
+            ->post('/forms/' . $setup['form']->id . '/restore')
+            ->assertRedirect(route('forms.show', $setup['form']));
+
+        $setup['form']->refresh();
+        $this->assertEquals('draft', $setup['form']->status);
+    }
+
+    public function test_requester_cannot_restore_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'deleted']);
+
+        $this->actingAs($setup['requester'])
+            ->post('/forms/' . $setup['form']->id . '/restore')
+            ->assertForbidden();
+
+        $setup['form']->refresh();
+        $this->assertEquals('deleted', $setup['form']->status);
+    }
+
+    public function test_employee_cannot_restore_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'deleted']);
+
+        $this->actingAs($setup['employee'])
+            ->post('/forms/' . $setup['form']->id . '/restore')
+            ->assertForbidden();
+
+        $setup['form']->refresh();
+        $this->assertEquals('deleted', $setup['form']->status);
+    }
+
+    public function test_cannot_restore_non_deleted_form(): void
+    {
+        $setup = $this->createSetup();
+
+        $this->actingAs($setup['manager'])
+            ->post('/forms/' . $setup['form']->id . '/restore')
+            ->assertForbidden();
+
+        $setup['form']->refresh();
+        $this->assertEquals('draft', $setup['form']->status);
+    }
 }

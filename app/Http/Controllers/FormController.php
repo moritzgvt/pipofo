@@ -180,6 +180,15 @@ class FormController extends Controller
         return redirect()->route('employee.forms')->with('success', 'Form deleted.');
     }
 
+    public function restore(Form $form)
+    {
+        abort_unless(Auth::user()->isManagerOrAdmin(), 403);
+        abort_unless($form->isDeleted(), 403);
+
+        $form->update(['status' => 'draft']);
+        return redirect()->route('forms.show', $form)->with('success', 'Form restored.');
+    }
+
     public function revisions(Form $form)
     {
         $this->authorizeView($form);
