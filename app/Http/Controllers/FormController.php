@@ -100,12 +100,16 @@ class FormController extends Controller
         );
 
         $form->load('fields.inputFieldTemplate');
-        $missingFields = $form->fields
-            ->filter(fn($field) => $field->inputFieldTemplate->required && ($field->value === null || trim($field->value) === ''))
-            ->map(fn($field) => $field->inputFieldTemplate->label);
+        $missingFieldEntries = $form->fields
+            ->filter(fn($field) => $field->inputFieldTemplate->required && ($field->value === null || trim($field->value) === ''));
+        $missingFields = $missingFieldEntries->map(fn($field) => $field->inputFieldTemplate->label);
 
         if ($missingFields->isNotEmpty()) {
-            return back()->withErrors(['fields' => 'Please fill in all required fields: ' . $missingFields->implode(', ')]);
+            $missingFieldIds = $missingFieldEntries->pluck('input_field_template_id')->toArray();
+
+            return back()
+                ->withErrors(['fields' => 'Please fill in all required fields: ' . $missingFields->implode(', ')])
+                ->with('missing_fields', $missingFieldIds);
         }
 
         $form->update(['status' => 'submitted', 'submitted_at' => now()]);

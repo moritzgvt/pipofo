@@ -478,7 +478,9 @@ class FormStatusTest extends TestCase
         // Value is null (not filled in)
         $this->actingAs($setup['requester'])
             ->post('/forms/' . $setup['form']->id . '/submit')
-            ->assertRedirect();
+            ->assertRedirect()
+            ->assertSessionHasErrors('fields')
+            ->assertSessionHas('missing_fields', [$setup['fieldTemplate']->id]);
 
         $setup['form']->refresh();
         $this->assertEquals('draft', $setup['form']->status);

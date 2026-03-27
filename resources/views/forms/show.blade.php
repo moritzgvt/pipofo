@@ -111,18 +111,28 @@
             {{-- Form Fields --}}
             <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Form Data</h3>
+
+                @if($errors->has('fields'))
+                    <div class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-md">
+                        <p class="text-sm text-red-700 dark:text-red-300">{{ $errors->first('fields') }}</p>
+                    </div>
+                @endif
+
+                @php $missingFieldIds = session('missing_fields', []); @endphp
                 @foreach($form->fields->sortBy(fn($f) => $f->inputFieldTemplate->order) as $field)
                     @php
                         $fieldComments = $form->comments->where('input_field_template_id', $field->inputFieldTemplate->id);
                         $hasNewComments = $lastViewedAt && $fieldComments->contains(fn($c) => $c->created_at->gt($lastViewedAt));
+                        $isMissing = is_array($missingFieldIds) && in_array($field->input_field_template_id, $missingFieldIds);
                     @endphp
-                    <div class="mb-4 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 {{ $hasNewComments ? 'ring-2 ring-yellow-400 dark:ring-yellow-500 rounded-lg p-3 bg-yellow-50/30 dark:bg-yellow-900/10' : '' }}">
+                    <div class="mb-4 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 {{ $isMissing ? 'ring-2 ring-red-400 dark:ring-red-500 rounded-lg p-3 bg-red-50/30 dark:bg-red-900/10' : ($hasNewComments ? 'ring-2 ring-yellow-400 dark:ring-yellow-500 rounded-lg p-3 bg-yellow-50/30 dark:bg-yellow-900/10' : '') }}">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                             {{ $field->inputFieldTemplate->label }}
                             @if($field->inputFieldTemplate->required) <span class="text-red-500">*</span> @endif
+                            @if($isMissing) <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200">Required</span> @endif
                             @if($hasNewComments) <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200">New</span> @endif
                         </dt>
-                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                        <dd class="mt-1 text-sm {{ $isMissing ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100' }}">
                             {{ $field->value ?: '—' }}
                         </dd>
 
