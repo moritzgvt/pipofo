@@ -140,12 +140,28 @@
                 @endforeach
 
                 <div class="flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <a href="{{ route('forms.show', $form) }}" class="text-sm text-gray-500 dark:text-gray-400 hover:underline">Cancel</a>
+                    <div class="flex items-center gap-4">
+                        <a href="{{ route('forms.show', $form) }}" class="text-sm text-gray-500 dark:text-gray-400 hover:underline">Cancel</a>
+                        @if($form->isDraft())
+                            <button type="button"
+                                onclick="if(confirm('Are you sure you want to delete this form?')) { document.getElementById('delete-form').submit(); }"
+                                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800">
+                                {{ __('Löschen') }}
+                            </button>
+                        @endif
+                    </div>
                     <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
                         Save Changes
                     </button>
                 </div>
             </form>
+
+            @if($form->isDraft())
+                <form id="delete-form" method="POST" action="{{ route('forms.destroy', $form) }}" class="hidden">
+                    @csrf
+                    @method('DELETE')
+                </form>
+            @endif
         </div>
     </div>
 </x-app-layout>

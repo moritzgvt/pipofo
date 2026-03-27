@@ -13,7 +13,7 @@ class EmployeeController extends Controller
     public function forms(Request $request)
     {
         $query = Form::forEmployee(Auth::user())
-            ->where('status', '!=', 'draft')
+            ->whereNotIn('status', ['draft', 'deleted'])
             ->with('formTemplate', 'user', 'assignedEmployees');
 
         if ($request->filled('status') && in_array($request->status, ['submitted', 'corrections', 'accepted', 'declined'])) {
@@ -113,5 +113,24 @@ class EmployeeController extends Controller
 
         $forms = $query->latest()->paginate(15);
         return view('employee.completed-forms', compact('forms'));
+    }
+
+    public function deletedForms(Request $request)
+    {
+        abort_unless(Auth::user()->isManagerOrAdmin(), 403);
+
+        $query = Form::where('status', 'deleted')
+            ->with('formTemplate', 'user');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhereHas('user', fn($uq) => $uq->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        $forms = $query->latest()->paginate(15);
+        return view('employee.deleted-forms', compact('forms'));
     }
 }

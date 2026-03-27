@@ -526,9 +526,10 @@ class FormStatusTest extends TestCase
 
         $this->actingAs($setup['manager'])
             ->delete('/forms/' . $setup['form']->id)
-            ->assertRedirect(route('dashboard'));
+            ->assertRedirect(route('employee.forms'));
 
-        $this->assertDatabaseMissing('forms', ['id' => $setup['form']->id]);
+        $setup['form']->refresh();
+        $this->assertEquals('deleted', $setup['form']->status);
     }
 
     public function test_admin_can_delete_form(): void
@@ -538,20 +539,35 @@ class FormStatusTest extends TestCase
 
         $this->actingAs($admin)
             ->delete('/forms/' . $setup['form']->id)
-            ->assertRedirect(route('dashboard'));
+            ->assertRedirect(route('employee.forms'));
 
-        $this->assertDatabaseMissing('forms', ['id' => $setup['form']->id]);
+        $setup['form']->refresh();
+        $this->assertEquals('deleted', $setup['form']->status);
     }
 
-    public function test_requester_cannot_delete_form(): void
+    public function test_requester_can_delete_draft_form(): void
     {
         $setup = $this->createSetup();
 
         $this->actingAs($setup['requester'])
             ->delete('/forms/' . $setup['form']->id)
+            ->assertRedirect(route('requester.my-forms'));
+
+        $setup['form']->refresh();
+        $this->assertEquals('deleted', $setup['form']->status);
+    }
+
+    public function test_requester_cannot_delete_submitted_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+
+        $this->actingAs($setup['requester'])
+            ->delete('/forms/' . $setup['form']->id)
             ->assertForbidden();
 
-        $this->assertDatabaseHas('forms', ['id' => $setup['form']->id]);
+        $setup['form']->refresh();
+        $this->assertEquals('submitted', $setup['form']->status);
     }
 
     public function test_employee_cannot_delete_form(): void
@@ -563,5 +579,103 @@ class FormStatusTest extends TestCase
             ->assertForbidden();
 
         $this->assertDatabaseHas('forms', ['id' => $setup['form']->id]);
+    }
+
+    public function test_deleted_form_not_shown_in_requester_my_forms(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'deleted']);
+
+        $response = $this->actingAs($setup['requester'])
+            ->get('/requester/my-forms');
+
+        $response->assertOk();
+        $response->assertDontSeeText($setup['form']->title);
+    }
+
+    public function test_deleted_form_not_shown_in_employee_forms(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'deleted']);
+
+        $response = $this->actingAs($setup['manager'])
+            ->get('/employee/forms');
+
+        $response->assertOk();
+        $response->assertDontSeeText($setup['form']->title);
+    }
+
+    public function test_manager_can_view_deleted_forms_page(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'deleted']);
+
+        $response = $this->actingAs($setup['manager'])
+            ->get('/employee/deleted');
+
+        $response->assertOk();
+        $response->assertSeeText($setup['form']->title);
+    }
+
+    public function test_employee_base_cannot_view_deleted_forms_page(): void
+    {
+        $setup = $this->createSetup();
+
+        $this->actingAs($setup['employee'])
+            ->get('/employee/deleted')
+            ->assertForbidden();
+    }
+
+    public function test_requester_cannot_view_deleted_forms_page(): void
+    {
+        $setup = $this->createSetup();
+
+        $this->actingAs($setup['requester'])
+            ->get('/employee/deleted')
+            ->assertForbidden();
+    }
+
+    public function test_requester_cannot_view_deleted_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'deleted']);
+
+        $this->actingAs($setup['requester'])
+            ->get('/forms/' . $setup['form']->id)
+            ->assertForbidden();
+    }
+
+    public function test_manager_can_view_deleted_form(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'deleted']);
+
+        $this->actingAs($setup['manager'])
+            ->get('/forms/' . $setup['form']->id)
+            ->assertOk();
+    }
+
+    public function test_deleted_form_not_shown_in_requester_dashboard(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'deleted']);
+
+        $response = $this->actingAs($setup['requester'])
+            ->get('/dashboard');
+
+        $response->assertOk();
+        $response->assertDontSeeText($setup['form']->title);
+    }
+
+    public function test_deleted_form_not_shown_in_employee_dashboard(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'deleted']);
+
+        $response = $this->actingAs($setup['employee'])
+            ->get('/dashboard');
+
+        $response->assertOk();
+        $response->assertDontSeeText($setup['form']->title);
     }
 }
