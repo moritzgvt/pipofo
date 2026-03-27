@@ -15,7 +15,7 @@
                     <p class="text-gray-500 dark:text-gray-400">No templates yet. Create your first one!</p>
                 </div>
             @else
-                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg overflow-hidden">
+                <div class="template-table bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg overflow-hidden">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
@@ -33,7 +33,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $template->creator->name }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $template->forms_count }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $template->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' }}">
+                                        <span class="template-status inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $template->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' }}">
                                             {{ $template->is_active ? 'Active' : 'Inactive' }}
                                         </span>
                                     </td>

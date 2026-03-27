@@ -14,9 +14,9 @@
                     <p class="text-gray-500 dark:text-gray-400">No revisions yet.</p>
                 </div>
             @else
-                <div class="space-y-4">
+                <div class="revision-list space-y-4">
                     @foreach($revisions as $revision)
-                        <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
+                        <div class="revision-item bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
                             <div class="flex justify-between items-center mb-3">
                                 <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $revision->user->name }}</span>
                                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ $revision->created_at->format('M d, Y H:i') }}</span>
@@ -24,7 +24,7 @@
                             @if($revision->message)
                                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 italic">{{ $revision->message }}</p>
                             @endif
-                            <div class="space-y-2">
+                            <div class="revision-diff space-y-2">
                                 @foreach($revision->diff as $fieldId => $changes)
                                     <div class="text-sm">
                                         <span class="font-medium text-gray-700 dark:text-gray-300">{{ $fieldTemplates[$fieldId]->label ?? "Field #$fieldId" }}:</span>

@@ -7,7 +7,7 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <x-flash-message />
 
-            <form method="POST" action="{{ route('form-templates.update', $formTemplate) }}" x-data="formTemplateEditor()" class="space-y-6">
+            <form method="POST" action="{{ route('form-templates.update', $formTemplate) }}" x-data="formTemplateEditor()" class="template-form space-y-6">
                 @csrf
                 @method('PUT')
 
@@ -29,7 +29,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
+                <div class="template-fields bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Fields</h3>
                         <button type="button" @click="addField()" class="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition">+ Add Field</button>
@@ -37,7 +37,7 @@
 
                     <div class="space-y-4">
                         <template x-for="(field, index) in fields" :key="index">
-                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 relative">
+                            <div class="template-field-editor border border-gray-200 dark:border-gray-700 rounded-lg p-4 relative">
                                 <button type="button" @click="removeField(index)" x-show="fields.length > 1" class="absolute top-2 right-2 text-red-500 hover:text-red-700" aria-label="Remove field">&times;</button>
                                 <input type="hidden" :name="'fields[' + index + '][id]'" :value="field.id || ''">
 

@@ -15,7 +15,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('requester.forms.store', $formTemplate) }}" class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
+            <form method="POST" action="{{ route('requester.forms.store', $formTemplate) }}" class="form-create bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
                 @csrf
                 <div class="mb-6">
                     <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Form Title</label>

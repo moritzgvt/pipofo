@@ -15,7 +15,7 @@
                     <p class="text-gray-500 dark:text-gray-400">No users found.</p>
                 </div>
             @else
-                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg overflow-hidden">
+                <div class="user-table bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg overflow-hidden">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
@@ -34,9 +34,9 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $user->role_label }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($user->is_suspended)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">Suspended</span>
+                                            <span class="user-status inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">Suspended</span>
                                         @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">Active</span>
+                                            <span class="user-status inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">Active</span>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm">

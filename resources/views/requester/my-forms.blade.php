@@ -7,7 +7,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <x-flash-message />
 
-            <div class="mb-6 flex gap-2 flex-wrap">
+            <div class="status-filters mb-6 flex gap-2 flex-wrap">
                 <a href="{{ route('requester.my-forms') }}" class="px-3 py-1 rounded-full text-sm {{ !request('status') ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">All</a>
                 @foreach(['draft', 'submitted', 'accepted', 'declined', 'corrections'] as $s)
                     <a href="{{ route('requester.my-forms', ['status' => $s]) }}" class="px-3 py-1 rounded-full text-sm {{ request('status') === $s ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">{{ ucfirst($s) }}</a>
@@ -19,7 +19,7 @@
                     <p class="text-gray-500 dark:text-gray-400">No forms found.</p>
                 </div>
             @else
-                <div class="space-y-3">
+                <div class="form-list space-y-3">
                     @foreach($forms as $form)
                         <x-form-list-item :form="$form" />
                     @endforeach

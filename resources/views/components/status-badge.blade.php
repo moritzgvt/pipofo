@@ -17,6 +17,6 @@ $label = match($status) {
     default => ucfirst($status),
 };
 @endphp
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $classes }}">
+<span class="status-badge status-badge-{{ $status }} inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $classes }}">
     {{ $label }}
 </span>

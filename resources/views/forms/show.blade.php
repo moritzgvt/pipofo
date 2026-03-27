@@ -11,29 +11,29 @@
             <x-flash-message />
 
             {{-- Form Meta --}}
-            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6">
+            <div class="form-meta bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
-                        <span class="text-gray-500 dark:text-gray-400">Template</span>
-                        <p class="font-medium text-gray-900 dark:text-gray-100">{{ $form->formTemplate->name }}</p>
+                        <span class="form-meta-label text-gray-500 dark:text-gray-400">Template</span>
+                        <p class="form-meta-value font-medium text-gray-900 dark:text-gray-100">{{ $form->formTemplate->name }}</p>
                     </div>
                     <div>
-                        <span class="text-gray-500 dark:text-gray-400">Requester</span>
-                        <p class="font-medium text-gray-900 dark:text-gray-100">{{ $form->user->name }}</p>
+                        <span class="form-meta-label text-gray-500 dark:text-gray-400">Requester</span>
+                        <p class="form-meta-value font-medium text-gray-900 dark:text-gray-100">{{ $form->user->name }}</p>
                     </div>
                     <div>
-                        <span class="text-gray-500 dark:text-gray-400">Created</span>
-                        <p class="font-medium text-gray-900 dark:text-gray-100">{{ $form->created_at->format('M d, Y') }}</p>
+                        <span class="form-meta-label text-gray-500 dark:text-gray-400">Created</span>
+                        <p class="form-meta-value font-medium text-gray-900 dark:text-gray-100">{{ $form->created_at->format('M d, Y') }}</p>
                     </div>
                     <div>
-                        <span class="text-gray-500 dark:text-gray-400">Last Updated</span>
-                        <p class="font-medium text-gray-900 dark:text-gray-100">{{ $form->updated_at->format('M d, Y H:i') }}</p>
+                        <span class="form-meta-label text-gray-500 dark:text-gray-400">Last Updated</span>
+                        <p class="form-meta-value font-medium text-gray-900 dark:text-gray-100">{{ $form->updated_at->format('M d, Y H:i') }}</p>
                     </div>
                 </div>
             </div>
 
             {{-- Action Buttons --}}
-            <div class="flex flex-wrap gap-2 mb-6">
+            <div class="form-actions flex flex-wrap gap-2 mb-6">
                 @if(auth()->user()->isRequester() && $form->isEditable() && $form->user_id === auth()->id())
                     <a href="{{ route('forms.edit', $form) }}" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-sm">Edit</a>
                     <form method="POST" action="{{ route('forms.submit', $form) }}" class="inline">
@@ -67,7 +67,7 @@
 
             {{-- Request Corrections (Employee) --}}
             @if(auth()->user()->isEmployee() && $form->isSubmitted())
-                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6" x-data="{ open: false }">
+                <div class="correction-request bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6" x-data="{ open: false }">
                     <button @click="open = !open" class="text-sm font-medium text-yellow-600 dark:text-yellow-400 hover:underline">Request Corrections &darr;</button>
                     <form method="POST" action="{{ route('employee.forms.request-corrections', $form) }}" x-show="open" x-cloak class="mt-4">
                         @csrf
@@ -79,7 +79,7 @@
 
             {{-- Assign Employee (Manager/Admin) --}}
             @if(auth()->user()->isManagerOrAdmin() && $baseEmployees->isNotEmpty())
-                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6">
+                <div class="employee-assignment bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6">
                     <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Assigned Employees</h3>
                     @if($form->assignedEmployees->isNotEmpty())
                         <div class="flex flex-wrap gap-2 mb-3">
@@ -109,7 +109,7 @@
             @endif
 
             {{-- Form Fields --}}
-            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6">
+            <div class="form-fields bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Form Data</h3>
 
                 @if($errors->has('fields'))
@@ -125,20 +125,20 @@
                         $hasNewComments = $lastViewedAt && $fieldComments->contains(fn($c) => $c->created_at->gt($lastViewedAt));
                         $isMissing = is_array($missingFieldIds) && in_array($field->input_field_template_id, $missingFieldIds);
                     @endphp
-                    <div class="mb-4 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 {{ $isMissing ? 'ring-2 ring-red-400 dark:ring-red-500 rounded-lg p-3 bg-red-50/30 dark:bg-red-900/10' : ($hasNewComments ? 'ring-2 ring-yellow-400 dark:ring-yellow-500 rounded-lg p-3 bg-yellow-50/30 dark:bg-yellow-900/10' : '') }}">
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <div class="form-field mb-4 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 {{ $isMissing ? 'ring-2 ring-red-400 dark:ring-red-500 rounded-lg p-3 bg-red-50/30 dark:bg-red-900/10' : ($hasNewComments ? 'ring-2 ring-yellow-400 dark:ring-yellow-500 rounded-lg p-3 bg-yellow-50/30 dark:bg-yellow-900/10' : '') }}">
+                        <dt class="form-field-label text-sm font-medium text-gray-500 dark:text-gray-400">
                             {{ $field->inputFieldTemplate->label }}
                             @if($field->inputFieldTemplate->required) <span class="text-red-500">*</span> @endif
                             @if($isMissing) <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200">Required</span> @endif
                             @if($hasNewComments) <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200">New</span> @endif
                         </dt>
-                        <dd class="mt-1 text-sm {{ $isMissing ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100' }}">
+                        <dd class="form-field-value mt-1 text-sm {{ $isMissing ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100' }}">
                             {{ $field->value ?: '—' }}
                         </dd>
 
                         {{-- Field-specific comments (collapsible, visually distinct) --}}
                         @if($fieldComments->isNotEmpty() || !$form->isCompleted())
-                            <div x-data="{ expanded: {{ $fieldComments->isNotEmpty() ? 'true' : 'false' }} }" class="mt-2 bg-white dark:bg-gray-900/20 border border-gray-900 dark:border-white rounded-lg p-3">
+                            <div x-data="{ expanded: {{ $fieldComments->isNotEmpty() ? 'true' : 'false' }} }" class="field-comments mt-2 bg-white dark:bg-gray-900/20 border border-gray-900 dark:border-white rounded-lg p-3">
                                 <button @click="expanded = !expanded" type="button" class="flex items-center gap-1 text-xs font-medium text-gray-900 dark:text-white hover:underline">
                                     <svg :class="expanded ? 'rotate-90' : ''" class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                     Comments ({{ $fieldComments->count() }})
@@ -148,18 +148,18 @@
                                         <div class="space-y-2">
                                             @foreach($fieldComments as $comment)
                                                 @php $isNew = $lastViewedAt && $comment->created_at->gt($lastViewedAt); @endphp
-                                                <div class="p-2 rounded-md text-sm {{ $isNew ? 'bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400 dark:border-yellow-600' : ($comment->is_employee_comment ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600') }}">
+                                                <div class="comment p-2 rounded-md text-sm {{ $isNew ? 'bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400 dark:border-yellow-600' : ($comment->is_employee_comment ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600') }}">
                                                     <div class="flex justify-between items-center mb-1">
-                                                        <span class="text-xs font-medium {{ $comment->is_employee_comment ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200' }}">
+                                                        <span class="comment-author text-xs font-medium {{ $comment->is_employee_comment ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200' }}">
                                                             {{ $comment->user->name }}
                                                             @if($comment->is_employee_comment) <span class="text-xs">(Employee)</span> @endif
                                                         </span>
                                                         <span class="flex items-center gap-1">
                                                             @if($isNew) <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200">New</span> @endif
-                                                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
+                                                            <span class="comment-time text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
                                                         </span>
                                                     </div>
-                                                    <p class="text-sm text-gray-700 dark:text-gray-300">{{ $comment->body }}</p>
+                                                    <p class="comment-body text-sm text-gray-700 dark:text-gray-300">{{ $comment->body }}</p>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -172,7 +172,7 @@
                                                 <span x-show="!showForm">Add comment</span>
                                                 <span x-show="showForm" x-cloak>Cancel</span>
                                             </button>
-                                            <form method="POST" action="{{ route('forms.comments.store', $form) }}" x-show="showForm" x-cloak class="mt-2">
+                                            <form method="POST" action="{{ route('forms.comments.store', $form) }}" x-show="showForm" x-cloak class="comment-form mt-2">
                                                 @csrf
                                                 <input type="hidden" name="input_field_template_id" value="{{ $field->inputFieldTemplate->id }}">
                                                 <textarea name="body" required rows="2" placeholder="Add a comment for this field..." class="w-full text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
@@ -189,28 +189,28 @@
 
             {{-- General Comments --}}
             @php $generalComments = $form->comments->whereNull('input_field_template_id'); @endphp
-            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
+            <div class="general-comments bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">General Comments ({{ $generalComments->count() }})</h3>
 
                 @foreach($generalComments as $comment)
                     @php $isNew = $lastViewedAt && $comment->created_at->gt($lastViewedAt); @endphp
-                    <div class="mb-4 p-3 rounded-lg {{ $isNew ? 'bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400 dark:border-yellow-600' : ($comment->is_employee_comment ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'bg-gray-50 dark:bg-gray-700/50') }}">
+                    <div class="comment mb-4 p-3 rounded-lg {{ $isNew ? 'bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400 dark:border-yellow-600' : ($comment->is_employee_comment ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'bg-gray-50 dark:bg-gray-700/50') }}">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="text-sm font-medium {{ $comment->is_employee_comment ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200' }}">
+                            <span class="comment-author text-sm font-medium {{ $comment->is_employee_comment ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200' }}">
                                 {{ $comment->user->name }}
                                 @if($comment->is_employee_comment) <span class="text-xs">(Employee)</span> @endif
                             </span>
                             <span class="flex items-center gap-1">
                                 @if($isNew) <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200">New</span> @endif
-                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
+                                <span class="comment-time text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
                             </span>
                         </div>
-                        <p class="text-sm text-gray-700 dark:text-gray-300">{{ $comment->body }}</p>
+                        <p class="comment-body text-sm text-gray-700 dark:text-gray-300">{{ $comment->body }}</p>
                     </div>
                 @endforeach
 
                 @if(!$form->isCompleted())
-                    <form method="POST" action="{{ route('forms.comments.store', $form) }}" class="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <form method="POST" action="{{ route('forms.comments.store', $form) }}" class="comment-form mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
                         @csrf
                         <textarea name="body" required rows="3" placeholder="Add a general comment..." class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                         @error('body') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror

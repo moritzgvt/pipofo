@@ -8,7 +8,7 @@
             <x-flash-message />
 
             <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
-                <form method="POST" action="{{ route('users.update', $user) }}">
+                <form method="POST" action="{{ route('users.update', $user) }}" class="user-form">
                     @csrf
                     @method('PUT')
 
