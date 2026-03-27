@@ -30,15 +30,16 @@
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Fields</h3>
-                        <button type="button" @click="addField()" class="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition">+ Add Field</button>
-                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Fields</h3>
 
                     <div class="space-y-4">
                         <template x-for="(field, index) in fields" :key="index">
                             <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 relative">
-                                <button type="button" @click="removeField(index)" x-show="fields.length > 1" class="absolute top-2 right-2 text-red-500 hover:text-red-700" aria-label="Remove field">&times;</button>
+                                <div class="absolute top-2 right-2 flex items-center gap-1">
+                                    <button type="button" @click="moveUp(index)" x-show="index > 0" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1" aria-label="Move field up">&uarr;</button>
+                                    <button type="button" @click="moveDown(index)" x-show="index < fields.length - 1" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1" aria-label="Move field down">&darr;</button>
+                                    <button type="button" @click="removeField(index)" x-show="fields.length > 1" class="text-red-500 hover:text-red-700 p-1" aria-label="Remove field">&times;</button>
+                                </div>
                                 <input type="hidden" :name="'fields[' + index + '][id]'" :value="field.id || ''">
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -83,6 +84,10 @@
                             </div>
                         </template>
                     </div>
+
+                    <div class="mt-4">
+                        <button type="button" @click="addField()" class="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition">+ Add Field</button>
+                    </div>
                 </div>
 
                 <div class="flex justify-end gap-3">
@@ -115,6 +120,18 @@
                 },
                 removeField(index) {
                     this.fields.splice(index, 1);
+                },
+                moveUp(index) {
+                    if (index > 0) {
+                        const item = this.fields.splice(index, 1)[0];
+                        this.fields.splice(index - 1, 0, item);
+                    }
+                },
+                moveDown(index) {
+                    if (index < this.fields.length - 1) {
+                        const item = this.fields.splice(index, 1)[0];
+                        this.fields.splice(index + 1, 0, item);
+                    }
                 }
             }
         }
