@@ -12,11 +12,18 @@ class EmployeeController extends Controller
 {
     public function forms(Request $request)
     {
-        $query = Form::forEmployee(Auth::user())
-            ->whereNotIn('status', ['draft', 'deleted'])
+        $user = Auth::user();
+        $excludedStatuses = $user->isManagerOrAdmin() ? ['deleted'] : ['draft', 'deleted'];
+
+        $query = Form::forEmployee($user)
+            ->whereNotIn('status', $excludedStatuses)
             ->with('formTemplate', 'user', 'assignedEmployees');
 
-        if ($request->filled('status') && in_array($request->status, ['submitted', 'corrections', 'accepted', 'declined'])) {
+        $allowedStatuses = $user->isManagerOrAdmin()
+            ? ['draft', 'submitted', 'corrections', 'accepted', 'declined']
+            : ['submitted', 'corrections', 'accepted', 'declined'];
+
+        if ($request->filled('status') && in_array($request->status, $allowedStatuses)) {
             $query->where('status', $request->status);
         }
 
@@ -59,7 +66,10 @@ class EmployeeController extends Controller
         $forms = $query->paginate(15)->withQueryString();
 
         $templates = FormTemplate::orderBy('name')->get();
-        $creators = User::whereHas('forms', fn($q) => $q->where('status', '!=', 'draft'))->orderBy('name')->get();
+        $creatorsQuery = $user->isManagerOrAdmin()
+            ? fn($q) => $q->where('status', '!=', 'deleted')
+            : fn($q) => $q->whereNotIn('status', ['draft', 'deleted']);
+        $creators = User::whereHas('forms', $creatorsQuery)->orderBy('name')->get();
         $employees = User::whereIn('role', ['employee_base', 'employee_manager', 'employee_admin'])->orderBy('name')->get();
 
         return view('employee.forms', compact('forms', 'templates', 'creators', 'employees'));
