@@ -115,6 +115,49 @@ class EmployeeFormsFilterTest extends TestCase
         $response->assertDontSeeText('Draft Form');
     }
 
+    public function test_manager_sees_draft_forms(): void
+    {
+        $setup = $this->createSetup();
+        $response = $this->actingAs($setup['manager'])
+            ->get('/employee/forms');
+
+        $response->assertOk();
+        $response->assertSeeText('Draft Form');
+    }
+
+    public function test_base_employee_does_not_see_draft_forms(): void
+    {
+        $setup = $this->createSetup();
+        $response = $this->actingAs($setup['employee'])
+            ->get('/employee/forms');
+
+        $response->assertOk();
+        $response->assertDontSeeText('Draft Form');
+    }
+
+    public function test_manager_can_filter_by_draft_status(): void
+    {
+        $setup = $this->createSetup();
+        $response = $this->actingAs($setup['manager'])
+            ->get('/employee/forms?status=draft');
+
+        $response->assertOk();
+        $response->assertSeeText('Draft Form');
+        $response->assertDontSeeText('Submitted Form');
+        $response->assertDontSeeText('Accepted Form');
+    }
+
+    public function test_base_employee_cannot_filter_by_draft_status(): void
+    {
+        $setup = $this->createSetup();
+        $response = $this->actingAs($setup['employee'])
+            ->get('/employee/forms?status=draft');
+
+        $response->assertOk();
+        // Draft status filter should be ignored for base employees
+        $response->assertDontSeeText('Draft Form');
+    }
+
     public function test_filter_by_status(): void
     {
         $setup = $this->createSetup();

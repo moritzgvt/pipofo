@@ -37,6 +37,9 @@
                             <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Status') }}</label>
                             <select name="status" id="status" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="">{{ __('All') }}</option>
+                                @if(auth()->user()->isManagerOrAdmin())
+                                    <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>{{ __('Draft') }}</option>
+                                @endif
                                 <option value="submitted" {{ request('status') === 'submitted' ? 'selected' : '' }}>{{ __('Submitted') }}</option>
                                 <option value="corrections" {{ request('status') === 'corrections' ? 'selected' : '' }}>{{ __('Corrections Requested') }}</option>
                                 <option value="accepted" {{ request('status') === 'accepted' ? 'selected' : '' }}>{{ __('Accepted') }}</option>
