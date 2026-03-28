@@ -290,6 +290,94 @@ class AllRolesFormCreationTest extends TestCase
         $this->assertEquals('submitted', $form->status);
     }
 
+    public function test_employee_sees_edit_and_submit_buttons_on_own_draft_form(): void
+    {
+        $setup = $this->createSetup();
+        $form = Form::create([
+            'form_template_id' => $setup['template']->id,
+            'user_id' => $setup['employee']->id,
+            'title' => 'Employee Draft',
+            'status' => 'draft',
+        ]);
+        FormField::create([
+            'form_id' => $form->id,
+            'input_field_template_id' => $setup['fieldTemplate']->id,
+            'value' => null,
+        ]);
+
+        $response = $this->actingAs($setup['employee'])
+            ->get('/forms/' . $form->id);
+        $response->assertOk();
+        $response->assertSee('Edit');
+        $response->assertSee('Submit');
+    }
+
+    public function test_manager_sees_edit_and_submit_buttons_on_own_draft_form(): void
+    {
+        $setup = $this->createSetup();
+        $form = Form::create([
+            'form_template_id' => $setup['template']->id,
+            'user_id' => $setup['manager']->id,
+            'title' => 'Manager Draft',
+            'status' => 'draft',
+        ]);
+        FormField::create([
+            'form_id' => $form->id,
+            'input_field_template_id' => $setup['fieldTemplate']->id,
+            'value' => null,
+        ]);
+
+        $response = $this->actingAs($setup['manager'])
+            ->get('/forms/' . $form->id);
+        $response->assertOk();
+        $response->assertSee('Edit');
+        $response->assertSee('Submit');
+    }
+
+    public function test_admin_sees_edit_and_submit_buttons_on_own_draft_form(): void
+    {
+        $setup = $this->createSetup();
+        $form = Form::create([
+            'form_template_id' => $setup['template']->id,
+            'user_id' => $setup['admin']->id,
+            'title' => 'Admin Draft',
+            'status' => 'draft',
+        ]);
+        FormField::create([
+            'form_id' => $form->id,
+            'input_field_template_id' => $setup['fieldTemplate']->id,
+            'value' => null,
+        ]);
+
+        $response = $this->actingAs($setup['admin'])
+            ->get('/forms/' . $form->id);
+        $response->assertOk();
+        $response->assertSee('Edit');
+        $response->assertSee('Submit');
+    }
+
+    public function test_employee_sees_edit_and_submit_buttons_on_own_corrections_form(): void
+    {
+        $setup = $this->createSetup();
+        $form = Form::create([
+            'form_template_id' => $setup['template']->id,
+            'user_id' => $setup['employee']->id,
+            'title' => 'Employee Corrections',
+            'status' => 'corrections',
+        ]);
+        FormField::create([
+            'form_id' => $form->id,
+            'input_field_template_id' => $setup['fieldTemplate']->id,
+            'value' => null,
+        ]);
+
+        $response = $this->actingAs($setup['employee'])
+            ->get('/forms/' . $form->id);
+        $response->assertOk();
+        $response->assertSee('Edit');
+        $response->assertSee('Submit');
+    }
+
     public function test_employee_cannot_edit_others_form(): void
     {
         $setup = $this->createSetup();

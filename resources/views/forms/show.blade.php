@@ -34,7 +34,7 @@
 
             {{-- Action Buttons --}}
             <div class="flex flex-wrap gap-2 mb-6">
-                @if(auth()->user()->isRequester() && $form->isEditable() && $form->user_id === auth()->id())
+                @if($form->isEditable() && $form->user_id === auth()->id())
                     <a href="{{ route('forms.edit', $form) }}" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-sm">Edit</a>
                     <form method="POST" action="{{ route('forms.submit', $form) }}" class="inline">
                         @csrf
