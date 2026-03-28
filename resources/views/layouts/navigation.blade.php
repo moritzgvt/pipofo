@@ -136,7 +136,7 @@
             </x-responsive-nav-link>
 
             @if(auth()->user()->isEmployee())
-                <x-responsive-nav-link :href="route('employee.forms')" :active="request()->routeIs('employee.forms')">{{ __('Forms') }}</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('employee.forms')" :active="request()->routeIs('employee.forms') || request()->routeIs('employee.deleted')">{{ __('Forms') }}</x-responsive-nav-link>
                 @if(auth()->user()->isManagerOrAdmin())
                     <x-responsive-nav-link :href="route('form-templates.index')" :active="request()->routeIs('form-templates.*')">{{ __('Templates') }}</x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">{{ __('Users') }}</x-responsive-nav-link>

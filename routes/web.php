@@ -36,6 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/forms/{form}/submit', [FormController::class, 'submit'])->name('forms.submit');
     Route::get('/forms/{form}/revisions', [FormController::class, 'revisions'])->name('forms.revisions');
     Route::post('/forms/{form}/comments', [CommentController::class, 'store'])->name('forms.comments.store');
+    Route::delete('/forms/{form}', [FormController::class, 'destroy'])->name('forms.destroy');
 
     // Employee routes
     Route::middleware('role:employee_base,employee_manager,employee_admin')->prefix('employee')->name('employee.')->group(function () {
@@ -53,7 +54,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('form-templates', FormTemplateController::class)->except(['show']);
         Route::post('/forms/{form}/assign-employee', [FormController::class, 'assignEmployee'])->name('forms.assign-employee');
         Route::post('/forms/{form}/remove-employee', [FormController::class, 'removeEmployee'])->name('forms.remove-employee');
-        Route::delete('/forms/{form}', [FormController::class, 'destroy'])->name('forms.destroy');
+        Route::post('/forms/{form}/restore', [FormController::class, 'restore'])->name('forms.restore');
+        Route::get('/employee/deleted', [EmployeeController::class, 'deletedForms'])->name('employee.deleted');
 
         Route::resource('users', UserController::class)->except(['destroy']);
         Route::patch('/users/{user}/toggle-suspend', [UserController::class, 'toggleSuspend'])->name('users.toggle-suspend');

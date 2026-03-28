@@ -17,7 +17,9 @@ class RequesterController extends Controller
 
     public function myForms(Request $request)
     {
-        $query = Form::where('user_id', Auth::id())->with('formTemplate');
+        $query = Form::where('user_id', Auth::id())
+            ->where('status', '!=', 'deleted')
+            ->with('formTemplate');
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
