@@ -17,7 +17,7 @@
                     @php
                         $template = $field->inputFieldTemplate;
                         $fieldComments = $form->comments->where('input_field_template_id', $template->id);
-                        $hasNewComments = $lastViewedAt && $fieldComments->contains(fn($c) => $c->created_at->gt($lastViewedAt));
+                        $hasNewComments = $lastViewedAt && $fieldComments->contains(fn($c) => $c->created_at->gt($lastViewedAt) && $c->user_id !== auth()->id());
                     @endphp
                     <div class="mb-6 {{ $hasNewComments ? 'ring-2 ring-yellow-400 dark:ring-yellow-500 rounded-lg p-3 bg-yellow-50/30 dark:bg-yellow-900/10' : '' }}">
                         <label for="field_{{ $template->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -75,7 +75,7 @@
                                     @if($fieldComments->isNotEmpty())
                                         <div class="space-y-2">
                                             @foreach($fieldComments as $comment)
-                                                @php $isNew = $lastViewedAt && $comment->created_at->gt($lastViewedAt); @endphp
+                                                @php $isNew = $lastViewedAt && $comment->created_at->gt($lastViewedAt) && $comment->user_id !== auth()->id(); @endphp
                                                 <div class="p-2 rounded-md text-sm {{ $isNew ? 'bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400 dark:border-yellow-600' : ($comment->is_employee_comment ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600') }}">
                                                     <div class="flex justify-between items-center mb-1">
                                                         <span class="text-xs font-medium {{ $comment->is_employee_comment ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200' }}">
