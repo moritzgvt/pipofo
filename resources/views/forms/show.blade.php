@@ -133,7 +133,7 @@
                 @foreach($form->fields->sortBy(fn($f) => $f->inputFieldTemplate->order) as $field)
                     @php
                         $fieldComments = $form->comments->where('input_field_template_id', $field->inputFieldTemplate->id);
-                        $hasNewComments = $lastViewedAt && $fieldComments->contains(fn($c) => $c->created_at->gt($lastViewedAt));
+                        $hasNewComments = $lastViewedAt && $fieldComments->contains(fn($c) => $c->created_at->gt($lastViewedAt) && $c->user_id !== auth()->id());
                         $isMissing = is_array($missingFieldIds) && in_array($field->input_field_template_id, $missingFieldIds);
                     @endphp
                     <div class="mb-4 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 {{ $isMissing ? 'ring-2 ring-red-400 dark:ring-red-500 rounded-lg p-3 bg-red-50/30 dark:bg-red-900/10' : ($hasNewComments ? 'ring-2 ring-yellow-400 dark:ring-yellow-500 rounded-lg p-3 bg-yellow-50/30 dark:bg-yellow-900/10' : '') }}">
@@ -158,7 +158,7 @@
                                     @if($fieldComments->isNotEmpty())
                                         <div class="space-y-2">
                                             @foreach($fieldComments as $comment)
-                                                @php $isNew = $lastViewedAt && $comment->created_at->gt($lastViewedAt); @endphp
+                                                @php $isNew = $lastViewedAt && $comment->created_at->gt($lastViewedAt) && $comment->user_id !== auth()->id(); @endphp
                                                 <div class="p-2 rounded-md text-sm {{ $isNew ? 'bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400 dark:border-yellow-600' : ($comment->is_employee_comment ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600') }}">
                                                     <div class="flex justify-between items-center mb-1">
                                                         <span class="text-xs font-medium {{ $comment->is_employee_comment ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200' }}">
@@ -204,7 +204,7 @@
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">General Comments ({{ $generalComments->count() }})</h3>
 
                 @foreach($generalComments as $comment)
-                    @php $isNew = $lastViewedAt && $comment->created_at->gt($lastViewedAt); @endphp
+                    @php $isNew = $lastViewedAt && $comment->created_at->gt($lastViewedAt) && $comment->user_id !== auth()->id(); @endphp
                     <div class="mb-4 p-3 rounded-lg {{ $isNew ? 'bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400 dark:border-yellow-600' : ($comment->is_employee_comment ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'bg-gray-50 dark:bg-gray-700/50') }}">
                         <div class="flex justify-between items-center mb-1">
                             <span class="text-sm font-medium {{ $comment->is_employee_comment ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200' }}">
