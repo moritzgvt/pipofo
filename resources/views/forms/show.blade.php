@@ -61,6 +61,13 @@
                             <button type="submit" onclick="return confirm('Restore this form?')" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition text-sm">Restore</button>
                         </form>
                     @endif
+
+                    @if(auth()->user()->isManagerOrAdmin() && ($form->isAccepted() || $form->isDeclined()))
+                        <form method="POST" action="{{ route('forms.reset-to-submitted', $form) }}" class="inline">
+                            @csrf
+                            <button type="submit" onclick="return confirm('Reset this form to submitted?')" class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition text-sm">Reset to Submitted</button>
+                        </form>
+                    @endif
                 </div>
 
                 <div class="flex flex-wrap gap-2">
