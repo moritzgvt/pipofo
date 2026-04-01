@@ -190,6 +190,15 @@ class FormController extends Controller
         return redirect()->route('forms.show', $form)->with('success', 'Form restored.');
     }
 
+    public function resetToSubmitted(Form $form)
+    {
+        abort_unless(Auth::user()->isManagerOrAdmin(), 403);
+        abort_unless($form->isAccepted() || $form->isDeclined(), 403);
+
+        $form->update(['status' => 'submitted', 'completed_at' => null]);
+        return redirect()->route('forms.show', $form)->with('success', 'Form reset to submitted.');
+    }
+
     public function revisions(Form $form)
     {
         $this->authorizeView($form);
