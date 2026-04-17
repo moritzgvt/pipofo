@@ -316,6 +316,96 @@ class InlineFieldCommentTest extends TestCase
             ->assertDontSee('ring-yellow-400');
     }
 
+    public function test_own_comment_not_highlighted_as_new_on_show_page(): void
+    {
+        $setup = $this->createSetup();
+
+        // Simulate a previous visit by the requester
+        FormView::create([
+            'form_id' => $setup['form']->id,
+            'user_id' => $setup['requester']->id,
+            'last_viewed_at' => now()->subMinutes(10),
+        ]);
+
+        // The requester posts their own comment after their last visit
+        Comment::create([
+            'form_id' => $setup['form']->id,
+            'user_id' => $setup['requester']->id,
+            'input_field_template_id' => $setup['fieldTemplate']->id,
+            'body' => 'My own comment',
+            'is_employee_comment' => false,
+            'created_at' => now()->subMinutes(5),
+        ]);
+
+        $response = $this->actingAs($setup['requester'])
+            ->get(route('forms.show', $setup['form']));
+
+        // Own comment should appear but NOT be highlighted as new
+        $response->assertOk()
+            ->assertSee('My own comment')
+            ->assertDontSee('ring-yellow-400');
+    }
+
+    public function test_own_general_comment_not_highlighted_as_new_on_show_page(): void
+    {
+        $setup = $this->createSetup();
+
+        // Simulate a previous visit by the requester
+        FormView::create([
+            'form_id' => $setup['form']->id,
+            'user_id' => $setup['requester']->id,
+            'last_viewed_at' => now()->subMinutes(10),
+        ]);
+
+        // The requester posts their own general comment after their last visit
+        Comment::create([
+            'form_id' => $setup['form']->id,
+            'user_id' => $setup['requester']->id,
+            'input_field_template_id' => null,
+            'body' => 'My own general comment',
+            'is_employee_comment' => false,
+            'created_at' => now()->subMinutes(5),
+        ]);
+
+        $response = $this->actingAs($setup['requester'])
+            ->get(route('forms.show', $setup['form']));
+
+        // Own general comment should appear but NOT be highlighted as new
+        $response->assertOk()
+            ->assertSee('My own general comment')
+            ->assertDontSee('bg-yellow-100');
+    }
+
+    public function test_own_comment_not_highlighted_as_new_on_edit_page(): void
+    {
+        $setup = $this->createSetup();
+
+        // Simulate a previous visit by the requester
+        FormView::create([
+            'form_id' => $setup['form']->id,
+            'user_id' => $setup['requester']->id,
+            'last_viewed_at' => now()->subMinutes(10),
+        ]);
+
+        // The requester posts their own comment after their last visit
+        Comment::create([
+            'form_id' => $setup['form']->id,
+            'user_id' => $setup['requester']->id,
+            'input_field_template_id' => $setup['fieldTemplate']->id,
+            'body' => 'My own edit page comment',
+            'is_employee_comment' => false,
+            'created_at' => now()->subMinutes(5),
+        ]);
+
+        $response = $this->actingAs($setup['requester'])
+            ->get(route('forms.edit', $setup['form']));
+
+        // Own comment should appear but NOT be highlighted as new
+        $response->assertOk()
+            ->assertSee('My own edit page comment')
+            ->assertDontSee('ring-yellow-400');
+    }
+
     public function test_form_view_timestamp_updated_on_visit(): void
     {
         $setup = $this->createSetup();
