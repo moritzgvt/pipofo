@@ -14,23 +14,6 @@
             {{ __('Dashboard') }}
         </x-nav-link>
 
-        @if(auth()->user()->isEmployee())
-            <x-nav-link :href="route('employee.forms')" :active="request()->routeIs('employee.forms')">
-                <svg class="shrink-0 h-5 w-5 me-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                {{ __('Forms') }}
-            </x-nav-link>
-            @if(auth()->user()->isManagerOrAdmin())
-                <x-nav-link :href="route('form-templates.index')" :active="request()->routeIs('form-templates.*')">
-                    <svg class="shrink-0 h-5 w-5 me-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm0 8a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zm0 8a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2z" /></svg>
-                    {{ __('Templates') }}
-                </x-nav-link>
-                <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
-                    <svg class="shrink-0 h-5 w-5 me-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197" /></svg>
-                    {{ __('Users') }}
-                </x-nav-link>
-            @endif
-        @endif
-
         <x-nav-link :href="route('requester.available-forms')" :active="request()->routeIs('requester.available-forms')">
             <svg class="shrink-0 h-5 w-5 me-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             {{ __('Available Forms') }}
@@ -43,6 +26,29 @@
             <svg class="shrink-0 h-5 w-5 me-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             {{ __('Pending Corrections') }}
         </x-nav-link>
+
+        @if(auth()->user()->isEmployee())
+            <!-- Administration Section -->
+            <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+                <p class="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">{{ __('Administration') }}</p>
+                <div class="space-y-1">
+                    <x-nav-link :href="route('employee.forms')" :active="request()->routeIs('employee.forms')">
+                        <svg class="shrink-0 h-5 w-5 me-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        {{ __('Forms') }}
+                    </x-nav-link>
+                    @if(auth()->user()->isManagerOrAdmin())
+                        <x-nav-link :href="route('form-templates.index')" :active="request()->routeIs('form-templates.*')">
+                            <svg class="shrink-0 h-5 w-5 me-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm0 8a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zm0 8a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2z" /></svg>
+                            {{ __('Templates') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                            <svg class="shrink-0 h-5 w-5 me-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197" /></svg>
+                            {{ __('Users') }}
+                        </x-nav-link>
+                    @endif
+                </div>
+            </div>
+        @endif
     </nav>
 
     <!-- User Section -->
@@ -135,17 +141,23 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            @if(auth()->user()->isEmployee())
-                <x-responsive-nav-link :href="route('employee.forms')" :active="request()->routeIs('employee.forms') || request()->routeIs('employee.deleted')">{{ __('Forms') }}</x-responsive-nav-link>
-                @if(auth()->user()->isManagerOrAdmin())
-                    <x-responsive-nav-link :href="route('form-templates.index')" :active="request()->routeIs('form-templates.*')">{{ __('Templates') }}</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">{{ __('Users') }}</x-responsive-nav-link>
-                @endif
-            @endif
-
             <x-responsive-nav-link :href="route('requester.available-forms')" :active="request()->routeIs('requester.available-forms')">{{ __('Available Forms') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('requester.my-forms')" :active="request()->routeIs('requester.my-forms')">{{ __('My Forms') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('requester.pending-corrections')" :active="request()->routeIs('requester.pending-corrections')">{{ __('Pending Corrections') }}</x-responsive-nav-link>
+
+            @if(auth()->user()->isEmployee())
+                <!-- Administration Section -->
+                <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+                    <p class="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">{{ __('Administration') }}</p>
+                    <div class="space-y-1">
+                        <x-responsive-nav-link :href="route('employee.forms')" :active="request()->routeIs('employee.forms') || request()->routeIs('employee.deleted')">{{ __('Forms') }}</x-responsive-nav-link>
+                        @if(auth()->user()->isManagerOrAdmin())
+                            <x-responsive-nav-link :href="route('form-templates.index')" :active="request()->routeIs('form-templates.*')">{{ __('Templates') }}</x-responsive-nav-link>
+                            <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">{{ __('Users') }}</x-responsive-nav-link>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </nav>
 
         <!-- User Section -->
