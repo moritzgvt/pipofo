@@ -24,6 +24,10 @@ class DashboardController extends Controller
         $completedCount = (clone $query)->whereIn('status', ['accepted', 'declined'])->count();
         $recentForms = (clone $query)->latest()->take(5)->get();
 
-        return view('employee.dashboard', compact('submitted', 'correctionsCount', 'completedCount', 'recentForms'));
+        $myFormsCount = Form::where('user_id', $user->id)->count();
+        $myCorrections = Form::where('user_id', $user->id)->where('status', 'corrections')->count();
+        $templatesCount = \App\Models\FormTemplate::active()->count();
+
+        return view('employee.dashboard', compact('submitted', 'correctionsCount', 'completedCount', 'recentForms', 'myFormsCount', 'myCorrections', 'templatesCount'));
     }
 }

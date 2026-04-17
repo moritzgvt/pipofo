@@ -20,8 +20,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Requester routes
-    Route::middleware('role:requester')->prefix('requester')->name('requester.')->group(function () {
+    // Requester routes (available to all authenticated users)
+    Route::prefix('requester')->name('requester.')->group(function () {
         Route::get('/available-forms', [RequesterController::class, 'availableForms'])->name('available-forms');
         Route::get('/my-forms', [RequesterController::class, 'myForms'])->name('my-forms');
         Route::get('/pending-corrections', [RequesterController::class, 'pendingCorrections'])->name('pending-corrections');
