@@ -55,6 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/forms/{form}/assign-employee', [FormController::class, 'assignEmployee'])->name('forms.assign-employee');
         Route::post('/forms/{form}/remove-employee', [FormController::class, 'removeEmployee'])->name('forms.remove-employee');
         Route::post('/forms/{form}/restore', [FormController::class, 'restore'])->name('forms.restore');
+        Route::post('/forms/{form}/reset-to-submitted', [FormController::class, 'resetToSubmitted'])->name('forms.reset-to-submitted');
         Route::get('/employee/deleted', [EmployeeController::class, 'deletedForms'])->name('employee.deleted');
 
         Route::resource('users', UserController::class)->except(['destroy']);

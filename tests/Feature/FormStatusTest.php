@@ -777,4 +777,86 @@ class FormStatusTest extends TestCase
         $this->assertEquals('deleted', $setup['form']->status);
         $this->assertEquals('draft', $setup['form']->previous_status);
     }
+
+    public function test_manager_can_reset_accepted_form_to_submitted(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'accepted', 'completed_at' => now()]);
+
+        $this->actingAs($setup['manager'])
+            ->post('/forms/' . $setup['form']->id . '/reset-to-submitted')
+            ->assertRedirect(route('forms.show', $setup['form']));
+
+        $setup['form']->refresh();
+        $this->assertEquals('submitted', $setup['form']->status);
+        $this->assertNull($setup['form']->completed_at);
+    }
+
+    public function test_manager_can_reset_declined_form_to_submitted(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'declined', 'completed_at' => now()]);
+
+        $this->actingAs($setup['manager'])
+            ->post('/forms/' . $setup['form']->id . '/reset-to-submitted')
+            ->assertRedirect(route('forms.show', $setup['form']));
+
+        $setup['form']->refresh();
+        $this->assertEquals('submitted', $setup['form']->status);
+        $this->assertNull($setup['form']->completed_at);
+    }
+
+    public function test_admin_can_reset_accepted_form_to_submitted(): void
+    {
+        $setup = $this->createSetup();
+        $admin = User::factory()->create(['role' => 'employee_admin']);
+        $setup['form']->update(['status' => 'accepted', 'completed_at' => now()]);
+
+        $this->actingAs($admin)
+            ->post('/forms/' . $setup['form']->id . '/reset-to-submitted')
+            ->assertRedirect(route('forms.show', $setup['form']));
+
+        $setup['form']->refresh();
+        $this->assertEquals('submitted', $setup['form']->status);
+        $this->assertNull($setup['form']->completed_at);
+    }
+
+    public function test_requester_cannot_reset_form_to_submitted(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'accepted', 'completed_at' => now()]);
+
+        $this->actingAs($setup['requester'])
+            ->post('/forms/' . $setup['form']->id . '/reset-to-submitted')
+            ->assertForbidden();
+
+        $setup['form']->refresh();
+        $this->assertEquals('accepted', $setup['form']->status);
+    }
+
+    public function test_employee_base_cannot_reset_form_to_submitted(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'accepted', 'completed_at' => now()]);
+
+        $this->actingAs($setup['employee'])
+            ->post('/forms/' . $setup['form']->id . '/reset-to-submitted')
+            ->assertForbidden();
+
+        $setup['form']->refresh();
+        $this->assertEquals('accepted', $setup['form']->status);
+    }
+
+    public function test_cannot_reset_non_completed_form_to_submitted(): void
+    {
+        $setup = $this->createSetup();
+        $setup['form']->update(['status' => 'submitted']);
+
+        $this->actingAs($setup['manager'])
+            ->post('/forms/' . $setup['form']->id . '/reset-to-submitted')
+            ->assertForbidden();
+
+        $setup['form']->refresh();
+        $this->assertEquals('submitted', $setup['form']->status);
+    }
 }
