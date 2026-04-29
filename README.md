@@ -145,6 +145,56 @@ resources/views/
 | `/form-templates` | CRUD | Manage templates (Manager/Admin) |
 | `/forms/{form}/assign-employee` | POST | Assign employee (Manager/Admin) |
 
+## RESTful API (Requester)
+
+All form-related actions available to a Requester are also exposed via a JSON
+REST API under `/api`, so external systems (e.g. a WordPress plugin) can
+integrate the service. Authentication uses [Laravel Sanctum](https://laravel.com/docs/sanctum)
+personal access tokens transported as a `Bearer` token in the `Authorization`
+header.
+
+### Authentication
+
+```bash
+# Obtain a token
+curl -X POST https://example.test/api/login \
+  -H "Accept: application/json" \
+  -d "email=requester@pipofo.test" \
+  -d "password=password" \
+  -d "device_name=wordpress-plugin"
+# => { "token": "1|abc...", "token_type": "Bearer", "user": { ... } }
+
+# Use the token
+curl https://example.test/api/user \
+  -H "Authorization: Bearer 1|abc..." \
+  -H "Accept: application/json"
+
+# Revoke the current token
+curl -X POST https://example.test/api/logout \
+  -H "Authorization: Bearer 1|abc..."
+```
+
+### Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/login` | Issue a personal access token |
+| POST | `/api/logout` | Revoke the current token |
+| GET | `/api/user` | Authenticated user |
+| GET | `/api/form-templates` | List active form templates (paginated) |
+| GET | `/api/form-templates/{id}` | Show a template with its input fields |
+| POST | `/api/form-templates/{id}/forms` | Create a new form (optionally with `fields`) |
+| GET | `/api/forms` | List the authenticated user's forms (filter via `?status=`) |
+| GET | `/api/forms/{id}` | Show a single owned form with fields and comments |
+| PUT/PATCH | `/api/forms/{id}` | Update field values of a draft / corrections form |
+| POST | `/api/forms/{id}/submit` | Submit a draft / corrections form for review |
+| DELETE | `/api/forms/{id}` | Soft-delete a draft form |
+| POST | `/api/forms/{id}/comments` | Add a comment (optionally tied to a field) |
+
+All endpoints (except `/api/login`) require `Authorization: Bearer <token>` and
+return `application/json`. Validation errors are returned as `422` responses
+following Laravel's standard error envelope.
+
 ## UI Features
 
 - **Dark mode** — Tailwind CSS class-based dark mode support
